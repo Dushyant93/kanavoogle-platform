@@ -22,3 +22,15 @@ app:
     base-url: ${LLM_BASE_URL:https://api.openai.com/v1}
     api-key: ${LLM_API_KEY:}
     model: ${LLM_MODEL:gpt-4.1-mini}
+  fabric:
+    # false = local SHA-256 proof only (default, no blockchain needed)
+    # true  = issue the proof hash to the Hyperledger Fabric 'skillcred' chaincode
+    enabled: ${FABRIC_ENABLED:false}
+    peer-endpoint: ${FABRIC_PEER_ENDPOINT:peer0.org1.example.com:7051}
+    override-authority: ${FABRIC_OVERRIDE_AUTHORITY:peer0.org1.example.com}
+    msp-id: ${FABRIC_MSP_ID:Org1MSP}
+    channel: ${FABRIC_CHANNEL:mychannel}
+    chaincode: ${FABRIC_CHAINCODE:skillcred}
+    tls-cert-path: ${FABRIC_TLS_CERT_PATH:/fabric/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt}
+    cert-dir: ${FABRIC_CERT_DIR:/fabric/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts}
+    key-dir: ${FABRIC_KEY_DIR:/fabric/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore}
