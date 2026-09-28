@@ -18,7 +18,7 @@ services:
     depends_on:
       mongo: { condition: service_healthy }
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb+srv://${MONGO_INITDB_ROOT_USERNAME:-username}:${MONGO_INITDB_ROOT_PASSWORD:-pass}@cluster0.ygzsphl.mongodb.net/${MONGO_DATABASE:-kanavoogle}?authSource=admin&appName=Cluster0
+      SPRING_DATA_MONGODB_URI: mongodb+srv://${MONGO_INITDB_ROOT_USERNAME:-username}:${MONGO_INITDB_ROOT_PASSWORD:-pass}@cluster0.xlf0hq2.mongodb.net/${MONGO_DATABASE:-kanavoogle}?authSource=admin&appName=Cluster0
       JWT_SECRET: ${JWT_SECRET:-it's-a-secret-characters}
       JWT_TTL_MINUTES: ${JWT_TTL_MINUTES:-480}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
