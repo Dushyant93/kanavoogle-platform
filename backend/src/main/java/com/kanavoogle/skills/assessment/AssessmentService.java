@@ -53,8 +53,10 @@ public class AssessmentService {
         Set<String> seen = new HashSet<>();
         for (var a : attempts.findTop10ByStudentIdOrderByCreatedAtDesc(u.getId()))
             for (var q : a.getQuestions()) seen.add(q.getQuestionId());
-        List<Question> pool = new ArrayList<>(questions.findBySkillIdAndSubSkillIdAndComplexityAndActiveTrue(skill.getId(), sub.getId(), r.complexity()).stream().filter(q -> q.getAgeMin() <= p.getAge() && q.getAgeMax() >= p.getAge() && q.getYearMin() <= p.getYearLevel() && q.getYearMax() >= p.getYearLevel() && !seen.contains(q.getId())).toList());
+        List<Question> pool = new ArrayList<>(questions.findBySkillIdAndSubSkillIdAndComplexityAndActiveTrue(skill.getId(), sub.getId(), r.complexity()).stream().filter(q -> q.getAgeMin() <= p.getAge() && q.getAgeMax() >= p.getAge() && q.getYearMin() <= p.getYearLevel() && q.getYearMax() >= p.getYearLevel()).toList());
         Collections.shuffle(pool);
+        // Prefer unseen questions, then reuse suitable bank content before considering the existing fallback.
+        pool.sort(Comparator.comparing(q -> seen.contains(q.getId())));
         if (pool.size() < r.questionCount() && llm.enabled()) {
             int missing = r.questionCount() - pool.size();
             for (var g : llm.generate(new LlmQuestionClient.Request(p.getAge(), p.getYearLevel(), skill.getName(), sub.getName(), context(r.context()), r.complexity(), missing))) {
@@ -65,10 +67,6 @@ public class AssessmentService {
                 } catch (IllegalArgumentException ignored) {
                 }
             }
-        }
-        if (pool.size() < r.questionCount()) {
-            for (Question q : questions.findBySkillIdAndSubSkillIdAndComplexityAndActiveTrue(skill.getId(), sub.getId(), r.complexity()))
-                if (pool.stream().noneMatch(x -> Objects.equals(x.getId(), q.getId()))) pool.add(q);
         }
         if (pool.size() < r.questionCount())
             throw new IllegalStateException("Not enough approved questions for this configuration. Enable LLM integration or add question-bank content.");
