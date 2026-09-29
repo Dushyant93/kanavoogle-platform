@@ -22,6 +22,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class AssessmentServiceTest {
+    // Mock all external dependencies so these tests exercise AssessmentService only.
+    // No real MongoDB or external LLM service is used.
     private final AssessmentAttemptRepository attempts = mock(AssessmentAttemptRepository.class);
     private final QuestionRepository questions = mock(QuestionRepository.class);
     private final SkillRepository skills = mock(SkillRepository.class);
@@ -31,6 +33,7 @@ class AssessmentServiceTest {
     private static final String SHORTAGE = "Not enough approved questions for this configuration. "
             + "Enable LLM integration or add question-bank content.";
 
+    // Build a standard authenticated student, skill and saved-assessment context for each test.
     @BeforeEach
     void setup() {
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
@@ -56,11 +59,13 @@ class AssessmentServiceTest {
         });
     }
 
+    // Remove authentication state after each test so tests remain isolated.
     @AfterEach
     void cleanup() {
         SecurityContextHolder.clearContext();
     }
 
+    // Creates reusable valid question-bank records for test scenarios.
     private List<Question> bank(int count) {
         return IntStream.range(0, count).mapToObj(i -> {
             Question q = new Question();
@@ -76,15 +81,19 @@ class AssessmentServiceTest {
         }).toList();
     }
 
+    // Makes the mocked question repository return the supplied bank content.
     private void returns(List<Question> bank) {
         when(questions.findBySkillIdAndSubSkillIdAndComplexityAndActiveTrue(
                 "skill", "sub", Complexity.FOUNDATION)).thenReturn(bank);
     }
 
+    // Creates a standard assessment request with a configurable question count.
     private AssessmentService.Create request(int count) {
         return new AssessmentService.Create("skill", "sub", "General", Complexity.FOUNDATION, count);
     }
 
+    // Main question-bank path: enough suitable questions should satisfy the request
+    // without consulting the LLM client.
     @ParameterizedTest
     @ValueSource(ints = {3, 5, 7, 10, 15})
     void enoughBankQuestionsReturnExactCountWithoutConsultingLlm(int count) {
@@ -98,6 +107,7 @@ class AssessmentServiceTest {
         verifyNoInteractions(llm);
     }
 
+    // Prefer questions the student has not seen in recent assessments.
     @Test
     void prefersUnseenQuestions() {
         var bank = bank(6);
@@ -108,12 +118,15 @@ class AssessmentServiceTest {
         verifyNoInteractions(llm);
     }
 
+    // Marks selected questions as recently seen by creating a previous assessment attempt.
     private void seen(List<Question> bank) {
         var previous = new AssessmentAttempt();
         previous.setQuestions(bank.stream().map(AssessmentAttempt.QuestionSnapshot::from).toList());
         when(attempts.findTop10ByStudentIdOrderByCreatedAtDesc("student")).thenReturn(List.of(previous));
     }
 
+    // If unseen questions are insufficient, suitable previously seen bank questions
+    // are reused before the existing LLM fallback is considered.
     @Test
     void reusesSuitableSeenBankQuestionsEvenWhenLlmIsEnabled() {
         when(llm.enabled()).thenReturn(true);
@@ -129,6 +142,7 @@ class AssessmentServiceTest {
         verifyNoInteractions(llm);
     }
 
+    // Age/year-incompatible bank questions must not be used to fill a shortage.
     @Test
     void unsuitableQuestionsCannotFillShortageWhenLlmIsDisabled() {
         var bank = bank(4);
@@ -143,6 +157,8 @@ class AssessmentServiceTest {
         verify(questions, never()).save(any());
     }
 
+    // Preserve the existing fallback: when bank content is short and LLM is enabled,
+    // only the missing number of questions is requested from the mocked client.
     @Test
     void existingShortageFallbackStillUsesClientWhenEnabledButOnlyAMockInTests() {
         returns(bank(2));
@@ -154,6 +170,49 @@ class AssessmentServiceTest {
         verify(attempts, never()).save(any());
     }
 
+    // Valid generated questions should fill only the shortage and keep the requested metadata
+    // before being saved for later reuse.
+    @Test
+    void fillsOnlyShortageAndPreservesQuestionMetadata() {
+        returns(bank(2));
+        when(llm.enabled()).thenReturn(true);
+        when(llm.generate(any())).thenReturn(List.of(new LlmQuestionClient.GeneratedQuestion(
+                "MULTIPLE_CHOICE", "Choose the correct answer", List.of("A", "B", "C", "D"), "A", "A is correct.")));
+        when(questions.save(any())).thenAnswer(call -> {
+            Question q = call.getArgument(0);
+            assertThat(q.getSkillId()).isEqualTo("skill");
+            assertThat(q.getSubSkillId()).isEqualTo("sub");
+            assertThat(q.getContext()).isEqualTo("General");
+            assertThat(q.getComplexity()).isEqualTo(Complexity.FOUNDATION);
+            assertThat(q.getSource()).isEqualTo("LLM_VALIDATED");
+            assertThat(q.isActive()).isTrue();
+            q.setId("generated");
+            return q;
+        });
+        assertThat(service.create(request(3)).questions()).extracting(AssessmentService.QView::questionId)
+                .containsExactlyInAnyOrder("q0", "q1", "generated");
+        verify(llm).generate(new LlmQuestionClient.Request(15, 9, "Skill", "Sub-skill", "General", Complexity.FOUNDATION, 1));
+        verify(questions).save(any());
+    }
+
+    // Invalid generated questions must be rejected and must never be persisted.
+    @Test
+    void malformedGeneratedQuestionsAreNeverSaved() {
+        returns(bank(2));
+        when(llm.enabled()).thenReturn(true);
+        when(llm.generate(any())).thenReturn(List.of(
+                new LlmQuestionClient.GeneratedQuestion("MULTIPLE_CHOICE", "Choose the correct answer", List.of("A", "A", "C", "D"), "A", "Explanation"),
+                new LlmQuestionClient.GeneratedQuestion("MULTIPLE_CHOICE", "Choose the correct answer", Arrays.asList("A", null, "C", "D"), "A", "Explanation"),
+                new LlmQuestionClient.GeneratedQuestion("MULTIPLE_CHOICE", "Choose the correct answer", List.of("A", "B", "C", "D"), "Z", "Explanation"),
+                new LlmQuestionClient.GeneratedQuestion("MULTIPLE_CHOICE", "Choose the correct answer", List.of("A", "B", "C", "D"), "A", ""),
+                new LlmQuestionClient.GeneratedQuestion("TRUE_FALSE", "Choose the correct answer", List.of("True", "False"), "Maybe", "Explanation")));
+        assertThatThrownBy(() -> service.create(request(3))).hasMessage(SHORTAGE);
+        verify(questions, never()).save(any());
+        verify(attempts, never()).save(any());
+    }
+
+    // End-to-end service check for the bank-only path: create, answer and complete an assessment
+    // without any LLM interaction.
     @Test
     void questionBankAssessmentCanBeCompletedWithoutModelCalls() {
         returns(bank(5));
@@ -167,6 +226,7 @@ class AssessmentServiceTest {
         verifyNoInteractions(llm);
     }
 
+    // When the bank cannot satisfy the request, keep the existing readable HTTP 400 response.
     @Test
     void shortageKeepsExistingReadableHttp400() throws Exception {
         returns(bank(0));
