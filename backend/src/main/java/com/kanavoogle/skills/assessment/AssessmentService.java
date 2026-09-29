@@ -143,9 +143,11 @@ public class AssessmentService {
             throw new IllegalArgumentException("Invalid LLM question type");
         }
         String prompt = bounded(g.prompt(), 10, 700), answer = bounded(g.correctAnswer(), 1, 300), explanation = bounded(g.explanation(), 1, 700);
-        List<String> opts = g.options() == null ? List.of() : g.options().stream().map(String::trim).filter(x -> !x.isBlank()).toList();
-        if (type == QuestionType.MULTIPLE_CHOICE && (opts.size() != 4 || !opts.contains(answer)))
+        List<String> opts = g.options() == null ? List.of() : g.options().stream().map(x -> bounded(x, 1, 300)).toList();
+        if (type == QuestionType.MULTIPLE_CHOICE && (opts.size() != 4 || new HashSet<>(opts).size() != 4 || !opts.contains(answer)))
             throw new IllegalArgumentException("Invalid LLM MCQ");
+        if (type == QuestionType.TRUE_FALSE && (opts.size() != 2 || !opts.containsAll(List.of("True", "False")) || !opts.contains(answer)))
+            throw new IllegalArgumentException("Invalid LLM true/false question");
         Question q = new Question();
         q.setSkillId(skill);
         q.setSubSkillId(sub);
