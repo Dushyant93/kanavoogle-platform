@@ -1,0 +1,14 @@
+# Optional override: connects the backend to a locally running Hyperledger Fabric test-network.
+# Prerequisites: fabric-samples cloned next to this repo, test-network up with -ca,
+# and the 'skillcred' chaincode deployed from ../fabric-samples/skill-credential.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.fabric.yml up --build
+services:
+  backend:
+    environment:
+      FABRIC_ENABLED: "true"
+    volumes:
+      - ../fabric-samples/test-network/organizations:/fabric/organizations:ro
+    networks: [default, fabric_test]
+networks:
+  fabric_test:
+    external: true
