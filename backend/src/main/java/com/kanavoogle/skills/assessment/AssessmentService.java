@@ -53,8 +53,10 @@ public class AssessmentService {
         Set<String> seen = new HashSet<>();
         for (var a : attempts.findTop10ByStudentIdOrderByCreatedAtDesc(u.getId()))
             for (var q : a.getQuestions()) seen.add(q.getQuestionId());
-        List<Question> pool = new ArrayList<>(questions.findBySkillIdAndSubSkillIdAndComplexityAndActiveTrue(skill.getId(), sub.getId(), r.complexity()).stream().filter(q -> q.getAgeMin() <= p.getAge() && q.getAgeMax() >= p.getAge() && q.getYearMin() <= p.getYearLevel() && q.getYearMax() >= p.getYearLevel() && !seen.contains(q.getId())).toList());
+        List<Question> pool = new ArrayList<>(questions.findBySkillIdAndSubSkillIdAndComplexityAndActiveTrue(skill.getId(), sub.getId(), r.complexity()).stream().filter(q -> q.getAgeMin() <= p.getAge() && q.getAgeMax() >= p.getAge() && q.getYearMin() <= p.getYearLevel() && q.getYearMax() >= p.getYearLevel()).toList());
         Collections.shuffle(pool);
+        // Prefer unseen questions, then reuse suitable bank content before considering the existing fallback.
+        pool.sort(Comparator.comparing(q -> seen.contains(q.getId())));
         if (pool.size() < r.questionCount() && llm.enabled()) {
             int missing = r.questionCount() - pool.size();
             for (var g : llm.generate(new LlmQuestionClient.Request(p.getAge(), p.getYearLevel(), skill.getName(), sub.getName(), context(r.context()), r.complexity(), missing))) {
@@ -65,10 +67,6 @@ public class AssessmentService {
                 } catch (IllegalArgumentException ignored) {
                 }
             }
-        }
-        if (pool.size() < r.questionCount()) {
-            for (Question q : questions.findBySkillIdAndSubSkillIdAndComplexityAndActiveTrue(skill.getId(), sub.getId(), r.complexity()))
-                if (pool.stream().noneMatch(x -> Objects.equals(x.getId(), q.getId()))) pool.add(q);
         }
         if (pool.size() < r.questionCount())
             throw new IllegalStateException("Not enough approved questions for this configuration. Enable LLM integration or add question-bank content.");
@@ -145,9 +143,11 @@ public class AssessmentService {
             throw new IllegalArgumentException("Invalid LLM question type");
         }
         String prompt = bounded(g.prompt(), 10, 700), answer = bounded(g.correctAnswer(), 1, 300), explanation = bounded(g.explanation(), 1, 700);
-        List<String> opts = g.options() == null ? List.of() : g.options().stream().map(String::trim).filter(x -> !x.isBlank()).toList();
-        if (type == QuestionType.MULTIPLE_CHOICE && (opts.size() != 4 || !opts.contains(answer)))
+        List<String> opts = g.options() == null ? List.of() : g.options().stream().map(x -> bounded(x, 1, 300)).toList();
+        if (type == QuestionType.MULTIPLE_CHOICE && (opts.size() != 4 || new HashSet<>(opts).size() != 4 || !opts.contains(answer)))
             throw new IllegalArgumentException("Invalid LLM MCQ");
+        if (type == QuestionType.TRUE_FALSE && (opts.size() != 2 || !opts.containsAll(List.of("True", "False")) || !opts.contains(answer)))
+            throw new IllegalArgumentException("Invalid LLM true/false question");
         Question q = new Question();
         q.setSkillId(skill);
         q.setSubSkillId(sub);
