@@ -1,40 +1,35 @@
-import {Navigate, Route, Routes} from 'react-router-dom';
-import {useAuth} from './auth/AuthContext';
-import AppShell from './components/AppShell';
-import ProtectedRoute from './components/ProtectedRoute';
-import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import StudentDashboard from './pages/StudentDashboard';
-import AssessmentSetupPage from './pages/AssessmentSetupPage';
-import AssessmentRunPage from './pages/AssessmentRunPage';
-import AssessmentResultPage from './pages/AssessmentResultPage';
-import SchoolDashboard from './pages/SchoolDashboard';
-import EmployerDashboard from './pages/EmployerDashboard';
+import { assessmentRoutes } from './pages/assessments/routes'
+import { ComingSoon } from './pages/public/ComingSoon'
+import { Home } from './pages/public/Home'
+import { Login } from './pages/public/Login'
+import { Register } from './pages/public/Register'
+import { Dashboard } from './pages/student/Dashboard'
+import { SkillsWallet } from './pages/wallet'
+import { Profile } from './pages/profile'
+import { Profile as EditProfile } from './pages/student/Profile'
+
+// Links that exist in the UI but whose pages aren't built yet.
+// Remove a path from here once its real page is added below.
+const COMING_SOON_PAGES: Record<string, { title: string; signedIn: boolean }> = {
+  '/forgot-password': { title: 'Password reset', signedIn: false },
+  '/profile/share': { title: 'Share profile', signedIn: true },
+  '/wallet/export': { title: 'Export ledger', signedIn: true },
+  '/privacy': { title: 'Privacy policy', signedIn: false },
+  '/terms': { title: 'Terms of accreditation', signedIn: false },
+  '/audit-ledger': { title: 'Audit ledger', signedIn: false },
+}
 
 export default function App() {
-    const {user} = useAuth();
-    const home = user ? `/${user.role.toLowerCase()}` : '/';
-    return <Routes><Route path="/" element={<LandingPage/>}/><Route path="/login"
-                                                                    element={user ? <Navigate to={home}/> :
-                                                                        <LoginPage/>}/><Route path="/register"
-                                                                                              element={user ? <Navigate
-                                                                                                      to={home}/> :
-                                                                                                  <RegisterPage/>}/><Route
-        element={<AppShell/>}><Route path="/student" element={<ProtectedRoute
-        roles={['STUDENT']}><StudentDashboard/></ProtectedRoute>}/><Route path="/student/assessment/new"
-                                                                          element={<ProtectedRoute
-                                                                              roles={['STUDENT']}><AssessmentSetupPage/></ProtectedRoute>}/><Route
-        path="/student/assessment/:id"
-        element={<ProtectedRoute roles={['STUDENT']}><AssessmentRunPage/></ProtectedRoute>}/><Route
-        path="/student/assessment/:id/result"
-        element={<ProtectedRoute roles={['STUDENT']}><AssessmentResultPage/></ProtectedRoute>}/><Route path="/school"
-                                                                                                       element={
-                                                                                                           <ProtectedRoute
-                                                                                                               roles={['SCHOOL']}><SchoolDashboard/></ProtectedRoute>}/><Route
-        path="/employer"
-        element={<ProtectedRoute roles={['EMPLOYER']}><EmployerDashboard/></ProtectedRoute>}/></Route><Route path="*"
-                                                                                                             element={
-                                                                                                                 <Navigate
-                                                                                                                     to={home}/>}/></Routes>
+  const path = window.location.pathname
+  if (path === '/login') return <Login />
+  if (path === '/register') return <Register />
+  if (path === '/student') return <Dashboard />
+  if (path === '/wallet') return <SkillsWallet />
+  if (path === '/profile/edit') return <EditProfile />
+  if (path === '/profile') return <Profile />
+  const AssessmentPage = assessmentRoutes[path]
+  if (AssessmentPage) return <AssessmentPage />
+  const comingSoon = COMING_SOON_PAGES[path]
+  if (comingSoon) return <ComingSoon {...comingSoon} />
+  return <Home />
 }
