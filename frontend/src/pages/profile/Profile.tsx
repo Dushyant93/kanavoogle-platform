@@ -1,56 +1,78 @@
 import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
-import ProgressBar from 'react-bootstrap/ProgressBar'
 import Row from 'react-bootstrap/Row'
+import Spinner from 'react-bootstrap/Spinner'
+import Alert from 'react-bootstrap/Alert'
 import { Footer } from '../../layout/Footer'
 import { Header } from '../../layout/Header'
-import type { User } from '../../types/auth'
+import { useAuth } from '../../hooks/useAuth'
+import { useStudent } from '../../hooks/useStudent'
+import { useWallet } from '../../hooks/useWallet'
 import '../../styles/style.css'
 
-const student: User = {
-  id: 'student-1',
-  email: 'alex.morgan@example.com',
-  displayName: 'Alex Morgan',
-  role: 'STUDENT',
-  verificationStatus: 'NOT_REQUIRED',
-  studentProfile: {
-    age: 15,
-    yearLevel: 4,
-    schoolName: 'Stanford Scholar',
-    region: 'Sydney',
-    skillSharingConsent: true,
-  },
-}
-
-const STATS = [
-  { kicker: 'Total Assessments', value: '12', label: 'Tests Done' },
-  { kicker: 'Performance Standard', value: 'A+', label: 'Avg Grade' },
-  { kicker: 'Accreditation Progress', value: '4', label: 'Skills Mastered' },
-  { kicker: 'Rank and Percentile', value: 'Top 5%', label: 'Cohort Standing' },
-] as const
-
-const HOLDINGS = [
-  { code: 'CR', name: 'Creativity', amount: '18 SC' },
-  { code: 'PS', name: 'Problem Solv.', amount: '15 SC' },
-  { code: 'CM', name: 'Comm.', amount: '9 SC' },
-  { code: 'DU', name: 'Digital Use', amount: '6 SC' },
-] as const
-
-const RESULTS = [
-  { name: 'Creativity & Innovation', date: 'Oct 24', score: '100%', coins: '+3 SC' },
-  { name: 'Algorithm Logic', date: 'Oct 22', score: '94%', coins: '+3 SC' },
-] as const
-
 export function Profile() {
+  const { user, loading: authLoading } = useAuth()
+  const { dashboard, loading: dashboardLoading, error: dashboardError } = useStudent()
+  const { wallet, loading: walletLoading, error: walletError } = useWallet()
+
+  const loading = authLoading || dashboardLoading || walletLoading
+
+  if (loading) {
+    return (
+      <>
+        <Header user={user} active="profile" />
+        <main className="dashboard">
+          <Container className="text-center py-5">
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">Loading profile</span>
+            </Spinner>
+          </Container>
+        </main>
+        <Footer />
+      </>
+    )
+  }
+
+  if (!user) {
+    return (
+      <>
+        <Header user={null} active="profile" />
+        <main className="dashboard">
+          <Container className="py-5">
+            <Alert variant="warning">You need to sign in to view your profile.</Alert>
+          </Container>
+        </main>
+        <Footer />
+      </>
+    )
+  }
+
+  const recentAssessments = dashboard?.recentAssessments ?? []
+  const completedAssessments = recentAssessments.filter((a) => a.status === 'COMPLETED')
+  const totalAssessments = completedAssessments.length
+
+  const averagePercent =
+    completedAssessments.length > 0
+      ? Math.round(
+          completedAssessments.reduce((sum, a) => sum + (a.weightedPercent ?? a.rawPercent ?? 0), 0) /
+            completedAssessments.length,
+        )
+      : null
+
+  const skills = wallet?.skills ?? []
+
   return (
     <>
-      <Header user={student} active="profile" />
+      <Header user={user} active="profile" />
       <main className="dashboard">
         <Container>
           <div className="d-flex flex-column flex-lg-row justify-content-lg-between align-items-lg-start gap-3 mb-4">
             <div>
-              <h1 className="dashboard__hello">Hi, Alex</h1>
-              <p className="dashboard__intro">Level 4 Scholar, Stanford Scholar</p>
+              <h1 className="dashboard__hello">Hi, {user.displayName}</h1>
+              <p className="dashboard__intro">
+                {user.studentProfile?.yearLevel != null ? `Year ${user.studentProfile.yearLevel}` : ''}
+                {user.studentProfile?.schoolName ? `, ${user.studentProfile.schoolName}` : ''}
+              </p>
             </div>
             <div className="d-flex flex-wrap gap-2">
               <a className="dashboard__secondary" href="/profile/edit">Edit Profile</a>
@@ -58,48 +80,37 @@ export function Profile() {
             </div>
           </div>
 
-          <Row className="g-3">
-            {STATS.map((stat) => (
-              <Col key={stat.kicker} xs={6} xl={3}>
-                <article className="dashboard__card">
-                  <p className="dashboard__kicker">{stat.kicker}</p>
-                  <div className="profile__stat-value">{stat.value}</div>
-                  <div className="dashboard__stat-label">{stat.label}</div>
-                </article>
-              </Col>
-            ))}
-          </Row>
+          {dashboardError ? <Alert variant="danger">{dashboardError}</Alert> : null}
+          {walletError ? <Alert variant="danger">{walletError}</Alert> : null}
 
-          <Row className="g-3 mt-1">
-            <Col lg={6}>
-              <section className="dashboard__card">
-                <p className="dashboard__kicker">Available balance</p>
-                <p className="dashboard__balance">48 SC <span>(about 48 dollars Tuition Credit)</span></p>
-                <div className="d-flex justify-content-between gap-3 flex-wrap mt-2">
-                  <p className="dashboard__progress-label mb-2">Level 4 Scholar, 80% to Level 5</p>
-                  <p className="dashboard__unlock mb-2">12 SC to Unlock</p>
-                </div>
-                <ProgressBar now={80} className="dashboard__progress" />
-                <p className="dashboard__note mt-2">Earn 12 more SC to unlock Level 5 Master tier benefits.</p>
-                <div className="d-flex flex-wrap gap-2 mt-3">
-                  <a className="dashboard__primary" href="/tests">Start New Test</a>
-                  <a className="dashboard__secondary" href="/wallet">My Vault</a>
-                </div>
-              </section>
+          <Row className="g-3">
+            <Col xs={6} xl={3}>
+              <article className="dashboard__card">
+                <p className="dashboard__kicker">Total Assessments</p>
+                <div className="profile__stat-value">{totalAssessments}</div>
+                <div className="dashboard__stat-label">Tests Done</div>
+              </article>
             </Col>
-            <Col lg={6}>
-              <section className="dashboard__card">
-                <div className="d-flex justify-content-between align-items-center gap-2 mb-2">
-                  <p className="dashboard__kicker mb-0">Todays Recommended Test</p>
-                  <span className="dashboard__chip">Max +3 SC</span>
-                </div>
-                <h2 className="dashboard__card-title">Creativity & Innovation</h2>
-                <p className="dashboard__note">Challenge core generative ideation and design heuristics to substantiate your Level 4 accreditation.</p>
-                <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mt-3">
-                  <p className="dashboard__meta mb-0">8 Questions, 15 Mins</p>
-                  <a className="dashboard__primary" href="/tests">Begin Assessment</a>
-                </div>
-              </section>
+            <Col xs={6} xl={3}>
+              <article className="dashboard__card">
+                <p className="dashboard__kicker">Performance Standard</p>
+                <div className="profile__stat-value">{averagePercent != null ? `${averagePercent}%` : '—'}</div>
+                <div className="dashboard__stat-label">Avg Score</div>
+              </article>
+            </Col>
+            <Col xs={6} xl={3}>
+              <article className="dashboard__card">
+                <p className="dashboard__kicker">Accreditation Progress</p>
+                <div className="profile__stat-value">{skills.length}</div>
+                <div className="dashboard__stat-label">Skills Tracked</div>
+              </article>
+            </Col>
+            <Col xs={6} xl={3}>
+              <article className="dashboard__card">
+                <p className="dashboard__kicker">Rank and Percentile</p>
+                <div className="profile__stat-value">—</div>
+                <div className="dashboard__stat-label">Coming soon</div>
+              </article>
             </Col>
           </Row>
 
@@ -111,17 +122,21 @@ export function Profile() {
                   <a className="dashboard__link" href="/wallet">Manage Allocation</a>
                 </div>
                 <p className="dashboard__note">Validated scholar credits allocated by core competence.</p>
-                <Row className="g-2 mt-2">
-                  {HOLDINGS.map((holding) => (
-                    <Col key={holding.code} xs={6}>
-                      <article className="dashboard__holding">
-                        <span>{holding.code}</span>
-                        <strong>{holding.name}</strong>
-                        <em>{holding.amount}</em>
-                      </article>
-                    </Col>
-                  ))}
-                </Row>
+                {skills.length === 0 ? (
+                  <p className="dashboard__note mt-2">No skill evidence yet.</p>
+                ) : (
+                  <Row className="g-2 mt-2">
+                    {skills.map((skill) => (
+                      <Col key={skill.skillId} xs={6}>
+                        <article className="dashboard__holding">
+                          <span>{skill.skillName}</span>
+                          <strong>{Math.round(skill.evidenceScore)}% evidence</strong>
+                          <em>{skill.completedAssessments} tests</em>
+                        </article>
+                      </Col>
+                    ))}
+                  </Row>
+                )}
               </section>
             </Col>
             <Col lg={6}>
@@ -130,18 +145,25 @@ export function Profile() {
                   <h2 className="dashboard__card-title mb-0">Recent Tests and Results</h2>
                   <a className="dashboard__link" href="/tests">View All History</a>
                 </div>
-                <ul className="dashboard__results">
-                  {RESULTS.map((result) => (
-                    <li key={result.name}>
-                      <span>
-                        <strong>{result.name}</strong>
-                        <small>{result.date} Score {result.score}</small>
-                      </span>
-                      <span className="dashboard__coins">{result.coins}</span>
-                      <span className="dashboard__confirmed">Confirmed</span>
-                    </li>
-                  ))}
-                </ul>
+                {recentAssessments.length === 0 ? (
+                  <p className="dashboard__note">No assessments completed yet.</p>
+                ) : (
+                  <ul className="dashboard__results">
+                    {recentAssessments.slice(0, 5).map((assessment) => (
+                      <li key={assessment.id}>
+                        <span>
+                          <strong>{assessment.skillName}</strong>
+                          <small>
+                            {assessment.completedAt ? new Date(assessment.completedAt).toLocaleDateString() : 'In progress'}
+                            {' '}
+                            Score {assessment.weightedPercent ?? assessment.rawPercent ?? '—'}%
+                          </small>
+                        </span>
+                        <span className="dashboard__confirmed">{assessment.coinAllocationStatus}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </section>
             </Col>
           </Row>
