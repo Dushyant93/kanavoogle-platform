@@ -1,13 +1,15 @@
+import { useState } from 'react'
 import Container from 'react-bootstrap/Container'
 import Nav from 'react-bootstrap/Nav'
 import Navbar from 'react-bootstrap/Navbar'
+import { authService } from '../services/authService'
 import type { User } from '../types/auth'
 import '../styles/style.css'
 
 const NAV_ITEMS = [
   { id: 'home', label: 'Home', href: '/student' },
   { id: 'tests', label: 'Tests', href: '/tests' },
-  { id: 'wallet', label: 'Wallet', href: '/wallet' },
+  { id: 'wallet', label: 'My Vault', href: '/my-vault' },
   { id: 'profile', label: 'Profile', href: '/profile' },
 ] as const
 
@@ -33,10 +35,21 @@ function initials(name: string) {
 }
 
 export function Header({ user, active = 'home' }: HeaderProps) {
+  const [loggingOut, setLoggingOut] = useState(false)
   const isStudent = user?.role === 'STUDENT'
   if (user && !isStudent) return null
 
   const yearLevel = user?.studentProfile?.yearLevel
+
+  async function handleLogout() {
+    setLoggingOut(true)
+    try {
+      await authService.logout()
+    } catch {
+      // The session may already be gone. Still leave the signed-in pages.
+    }
+    window.location.assign('/login')
+  }
 
   return (
     <Navbar expand="lg" className="student-header">
@@ -74,6 +87,9 @@ export function Header({ user, active = 'home' }: HeaderProps) {
                     {item.label}
                   </Nav.Link>
                 ))}
+                <button type="button" className="nav-link student-header__link student-header__logout" onClick={handleLogout} disabled={loggingOut}>
+                  {loggingOut ? 'Logging out...' : 'Logout'}
+                </button>
               </Nav>
               <div className="student-header__account">
                 <div>

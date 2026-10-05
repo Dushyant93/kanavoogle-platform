@@ -108,4 +108,4 @@ If `grade` is missing, the screen uses placeholder bands (A+ ≥ 95, A ≥ 85, a
 
 The mock competency grouping (two questions per competency, 10 points each) is only a placeholder. The real mapping of questions to competencies and points should come from the backend.
 
-"Back to Vault" links to `/wallet`, which is the wallet screen someone else is building.
+"Back to Vault" links to `/my-vault`, which is the wallet screen someone else is building.

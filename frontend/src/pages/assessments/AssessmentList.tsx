@@ -137,9 +137,9 @@ export function AssessmentList() {
     <AssessmentLayout>
       <div className="tests-page-head">
         <div>
-          <h1 className="tests-title">Assessment Lists</h1>
+          <h1 className="tests-title">Test Lists</h1>
           <p className="tests-subtitle">
-            Review your completed assessments, verified test scores, and minted Skill-Coins.
+            Review your completed tests, verified test scores, and minted Skill-Coins.
           </p>
         </div>
         <a className="tests-btn tests-btn--primary" href={assessmentPaths.start}>
@@ -147,7 +147,7 @@ export function AssessmentList() {
         </a>
       </div>
 
-      {loading ? <LoadingBlock label="Loading assessments" /> : null}
+      {loading ? <LoadingBlock label="Loading tests" /> : null}
       {error ? <ErrorBlock message={error} /> : null}
 
       {!loading && !error ? (
@@ -158,7 +158,7 @@ export function AssessmentList() {
               <Form.Control
                 type="search"
                 placeholder="Search by skill, title, or exam keyword..."
-                aria-label="Search assessments"
+                aria-label="Search tests"
                 value={search}
                 onChange={(event) => {
                   setSearch(event.target.value)
@@ -204,8 +204,8 @@ export function AssessmentList() {
           {shown.length === 0 ? (
             <div className="tests-empty">
               {assessments.length === 0
-                ? 'You haven’t taken any assessments yet. Start your first test to see it here.'
-                : 'No assessments match your filters. Try a different search.'}
+                ? 'You haven’t taken any tests yet. Start your first test to see it here.'
+                : 'No tests match your filters. Try a different search.'}
             </div>
           ) : (
             <div className="d-flex flex-column gap-3">
@@ -222,7 +222,7 @@ export function AssessmentList() {
                 className="tests-btn tests-btn--outline"
                 onClick={() => setVisible((count) => count + PAGE_SIZE)}
               >
-                Load Previous Assessments <FontAwesomeIcon icon={faChevronDown} />
+                Load Previous Tests <FontAwesomeIcon icon={faChevronDown} />
               </button>
             </div>
           ) : null}

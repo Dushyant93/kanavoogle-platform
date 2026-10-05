@@ -16,29 +16,29 @@ const student: User = {
   studentProfile: {
     age: 15,
     yearLevel: 4,
-    schoolName: 'Stanford Scholar',
+    schoolName: 'Glenorchy Higher Secondary School',
     region: 'Sydney',
     skillSharingConsent: true,
   },
 }
 
 const STATS = [
-  { kicker: 'Total Assessments', value: '12', label: 'Tests Done' },
+  { kicker: 'Total Tests', value: '12', label: 'Tests Done' },
   { kicker: 'Performance Standard', value: 'A+', label: 'Avg Grade' },
   { kicker: 'Accreditation Progress', value: '4', label: 'Skills Mastered' },
   { kicker: 'Rank and Percentile', value: 'Top 5%', label: 'Cohort Standing' },
 ] as const
 
 const HOLDINGS = [
-  { code: 'CR', name: 'Creativity', amount: '18 SC' },
-  { code: 'PS', name: 'Problem Solv.', amount: '15 SC' },
-  { code: 'CM', name: 'Comm.', amount: '9 SC' },
-  { code: 'DU', name: 'Digital Use', amount: '6 SC' },
+  { code: 'CR', name: 'Creativity', amount: '18 Skill Coines' },
+  { code: 'PS', name: 'Problem Solv.', amount: '15 Skill Coines' },
+  { code: 'CM', name: 'Comm.', amount: '9 Skill Coines' },
+  { code: 'DU', name: 'Digital Use', amount: '6 Skill Coines' },
 ] as const
 
 const RESULTS = [
-  { name: 'Creativity & Innovation', date: 'Oct 24', score: '100%', coins: '+3 SC' },
-  { name: 'Algorithm Logic', date: 'Oct 22', score: '94%', coins: '+3 SC' },
+  { name: 'Creativity & Innovation', date: 'Oct 24', score: '100%', coins: '+3 Skill Coines' },
+  { name: 'Algorithm Logic', date: 'Oct 22', score: '94%', coins: '+3 Skill Coines' },
 ] as const
 
 export function Profile() {
@@ -50,7 +50,7 @@ export function Profile() {
           <div className="d-flex flex-column flex-lg-row justify-content-lg-between align-items-lg-start gap-3 mb-4">
             <div>
               <h1 className="dashboard__hello">Hi, Alex</h1>
-              <p className="dashboard__intro">Level 4 Scholar, Stanford Scholar</p>
+              <p className="dashboard__intro">Level 4 Scholar</p>
             </div>
             <div className="d-flex flex-wrap gap-2">
               <a className="dashboard__secondary" href="/profile/edit">Edit Profile</a>
@@ -74,16 +74,16 @@ export function Profile() {
             <Col lg={6}>
               <section className="dashboard__card">
                 <p className="dashboard__kicker">Available balance</p>
-                <p className="dashboard__balance">48 SC <span>(about 48 dollars Tuition Credit)</span></p>
+                <p className="dashboard__balance">48 Skill Coines</p>
                 <div className="d-flex justify-content-between gap-3 flex-wrap mt-2">
                   <p className="dashboard__progress-label mb-2">Level 4 Scholar, 80% to Level 5</p>
-                  <p className="dashboard__unlock mb-2">12 SC to Unlock</p>
+                  <p className="dashboard__unlock mb-2">12 Skill Coines to Unlock</p>
                 </div>
                 <ProgressBar now={80} className="dashboard__progress" />
-                <p className="dashboard__note mt-2">Earn 12 more SC to unlock Level 5 Master tier benefits.</p>
+                <p className="dashboard__note mt-2">Earn 12 more Skill Coines to unlock Level 5 Master tier benefits.</p>
                 <div className="d-flex flex-wrap gap-2 mt-3">
                   <a className="dashboard__primary" href="/tests">Start New Test</a>
-                  <a className="dashboard__secondary" href="/wallet">My Vault</a>
+                  <a className="dashboard__secondary" href="/my-vault">My Vault</a>
                 </div>
               </section>
             </Col>
@@ -91,13 +91,13 @@ export function Profile() {
               <section className="dashboard__card">
                 <div className="d-flex justify-content-between align-items-center gap-2 mb-2">
                   <p className="dashboard__kicker mb-0">Todays Recommended Test</p>
-                  <span className="dashboard__chip">Max +3 SC</span>
+                  <span className="dashboard__chip">Max +3 Skill Coine</span>
                 </div>
                 <h2 className="dashboard__card-title">Creativity & Innovation</h2>
                 <p className="dashboard__note">Challenge core generative ideation and design heuristics to substantiate your Level 4 accreditation.</p>
                 <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mt-3">
                   <p className="dashboard__meta mb-0">8 Questions, 15 Mins</p>
-                  <a className="dashboard__primary" href="/tests">Begin Assessment</a>
+                  <a className="dashboard__primary" href="/tests">Begin Test</a>
                 </div>
               </section>
             </Col>
@@ -108,7 +108,7 @@ export function Profile() {
               <section className="dashboard__card">
                 <div className="d-flex justify-content-between align-items-start gap-2 mb-1">
                   <h2 className="dashboard__card-title mb-0">Skill Holdings</h2>
-                  <a className="dashboard__link" href="/wallet">Manage Allocation</a>
+                  <a className="dashboard__link" href="/my-vault">Manage Allocation</a>
                 </div>
                 <p className="dashboard__note">Validated scholar credits allocated by core competence.</p>
                 <Row className="g-2 mt-2">

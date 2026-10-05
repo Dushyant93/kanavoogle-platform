@@ -9,7 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/wallet")
+@RequestMapping("/api/my-vault")
 @PreAuthorize("hasRole('STUDENT')")
 public class WalletController {
     private final AssessmentAttemptRepository attempts;

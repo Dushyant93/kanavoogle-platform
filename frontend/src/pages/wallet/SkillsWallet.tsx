@@ -23,16 +23,16 @@ const student: User = {
 }
 
 const DOMAINS = [
-  { code: 'CI', name: 'Creativity & Innovation', amountLabel: '18 SC', percent: 37.5, tone: 'gold' },
-  { code: 'PS', name: 'Problem Solving', amountLabel: '15 SC', percent: 31.2, tone: 'green' },
-  { code: 'CM', name: 'Communication', amountLabel: '9 SC', percent: 18.8, tone: 'purple' },
-  { code: 'DU', name: 'Digital Use', amountLabel: '6 SC', percent: 12.5, tone: 'navy' },
+  { code: 'CI', name: 'Creativity & Innovation', amountLabel: '18 Skill Coines', percent: 37.5, tone: 'gold' },
+  { code: 'PS', name: 'Problem Solving', amountLabel: '15 Skill Coines', percent: 31.2, tone: 'green' },
+  { code: 'CM', name: 'Communication', amountLabel: '9 Skill Coines', percent: 18.8, tone: 'purple' },
+  { code: 'DU', name: 'Digital Use', amountLabel: '6 Skill Coines', percent: 12.5, tone: 'navy' },
 ] as const
 
 const EARNINGS = [
-  { title: 'Creativity & Innovation Assessment', meta: 'Scenario 08, Today 2:15 PM', coins: '+3 SC' },
-  { title: 'MVP Prototyping Milestone', meta: 'Verified by Faculty, Yesterday', coins: '+3 SC' },
-  { title: 'Campus Partner Workshop', meta: 'Design Thinking Lab, Oct 24', coins: '+2 SC' },
+  { title: 'Creativity & Innovation Test', meta: 'Scenario 08, Today 2:15 PM', coins: '+3 Skill Coines' },
+  { title: 'MVP Prototyping Milestone', meta: 'Verified by Faculty, Yesterday', coins: '+3 Skill Coines' },
+  { title: 'Campus Partner Workshop', meta: 'Design Thinking Lab, Oct 24', coins: '+2 Skill Coines' },
 ] as const
 
 export function SkillsWallet() {
@@ -49,8 +49,8 @@ export function SkillsWallet() {
               </p>
             </div>
             <div className="d-flex flex-wrap gap-2">
-              <a className="dashboard__secondary" href="/wallet/export">Export Ledger</a>
-              <a className="dashboard__primary" href="/tests">Start New Assessment</a>
+              <a className="dashboard__secondary" href="/my-vault/export">Export Ledger</a>
+              <a className="dashboard__primary" href="/tests">Start New Test</a>
             </div>
           </div>
 
@@ -58,14 +58,14 @@ export function SkillsWallet() {
             <Col lg={12}>
               <section className="dashboard__card">
                 <p className="dashboard__kicker">Total balance</p>
-                <p className="dashboard__balance">48 <span>SC</span></p>
+                <p className="dashboard__balance">48 <span>Skill Coines</span></p>
                 <p className="dashboard__note">Skill-Coins Minted</p>
                 <div className="d-flex justify-content-between gap-3 flex-wrap mt-3">
                   <p className="dashboard__progress-label mb-2">Level 4 Scholar</p>
-                  <p className="dashboard__unlock mb-2">48 / 60 SC</p>
+                  <p className="dashboard__unlock mb-2">48 / 60 Skill Coines</p>
                 </div>
                 <ProgressBar now={80} className="dashboard__progress" />
-                <p className="dashboard__note mt-2">Earn 12 more SC to unlock Level 5 Master Tier</p>
+                <p className="dashboard__note mt-2">Earn 12 more Skill Coines to unlock Level 5 Master Tier</p>
               </section>
             </Col>
           </Row>

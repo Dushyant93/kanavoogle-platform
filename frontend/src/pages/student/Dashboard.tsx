@@ -1,7 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faChartColumn,
-  faCircle,
   faCircleCheck,
   faClipboardCheck,
   faClock,
@@ -44,16 +43,16 @@ const STATS: { value: string; label: string; tone: 'brand' | 'accent'; icon: Ico
 ]
 
 const RESULTS = [
-  { name: 'Creativity & Innovation', date: 'Oct 24', score: '100%', coins: '+3 SC' },
-  { name: 'Algorithm Logic', date: 'Oct 22', score: '94%', coins: '+2 SC' },
-  { name: 'Digital Ethics', date: 'Oct 18', score: '90%', coins: '+2 SC' },
+  { name: 'Creativity & Innovation', date: 'Oct 24', score: '100%', coins: '+3 Skill Coine' },
+  { name: 'Algorithm Logic', date: 'Oct 22', score: '94%', coins: '+2 Skill Coine' },
+  { name: 'Digital Ethics', date: 'Oct 18', score: '90%', coins: '+2 Skill Coine' },
 ] as const
 
 const HOLDINGS = [
-  { code: 'CR', name: 'Creativity', amount: '18 SC' },
-  { code: 'PS', name: 'Problem Solv.', amount: '15 SC' },
-  { code: 'CM', name: 'Comm.', amount: '9 SC' },
-  { code: 'DU', name: 'Digital Use', amount: '6 SC' },
+  { code: 'CR', name: 'Creativity', amount: '18 Skill Coine' },
+  { code: 'PS', name: 'Problem Solv.', amount: '15 Skill Coine' },
+  { code: 'CM', name: 'Comm.', amount: '9 Skill Coine' },
+  { code: 'DU', name: 'Digital Use', amount: '6 Skill Coine' },
 ] as const
 
 
@@ -79,10 +78,6 @@ export function Dashboard() {
               </p>
             </div>
             <div className="d-flex flex-wrap gap-2">
-              <span className="dashboard__status">
-                <FontAwesomeIcon icon={faCircle} className="dashboard__dot" aria-hidden="true" />
-                Active Scholar Semester
-              </span>
               <span className="dashboard__minted">48 SkillCoins Minted</span>
             </div>
           </div>
@@ -98,7 +93,7 @@ export function Dashboard() {
                   <div>
                     <p className="dashboard__kicker">Available balance</p>
                     <p className="dashboard__balance">
-                      48 SC <span>(≈ $48.00 Tuition Credit)</span>
+                      48 Skill Coine
                     </p>
                     <p className="dashboard__note">
                       Backed by institutional proof-of-competency validation protocols.
@@ -113,17 +108,17 @@ export function Dashboard() {
                   <p className="dashboard__progress-label mb-2">
                     Level {yearLevel} Scholar • 80% to Level {(yearLevel ?? 4) + 1}
                   </p>
-                  <p className="dashboard__unlock mb-2">12 SC to Unlock</p>
+                  <p className="dashboard__unlock mb-2">12 Skill Coine to Unlock</p>
                 </div>
                 <ProgressBar now={80} className="dashboard__progress" />
                 <p className="dashboard__note mt-2">
-                  Earn 12 more SC to unlock Level 5 Master tier benefits & tuition grants.
+                  Earn 12 more Skill Coine to unlock Level 5 Master tier benefits & tuition grants.
                 </p>
                 <div className="d-flex flex-wrap gap-2 mt-3">
                   <a className="dashboard__primary" href="/tests">
                     <FontAwesomeIcon icon={faPlay} /> Start New Test
                   </a>
-                  <a className="dashboard__secondary" href="/wallet">
+                  <a className="dashboard__secondary" href="/my-vault">
                     <FontAwesomeIcon icon={faVault} /> My Vault
                   </a>
                 </div>
@@ -152,7 +147,7 @@ export function Dashboard() {
               <section className="dashboard__card">
                 <div className="d-flex justify-content-between align-items-center gap-2 mb-2">
                   <p className="dashboard__kicker mb-0">Today's Recommended Test</p>
-                  <span className="dashboard__chip">Max +3 SC</span>
+                  <span className="dashboard__chip">Max +3 Skill Coine</span>
                 </div>
                 <h2 className="dashboard__card-title">Creativity & Innovation</h2>
                 <p className="dashboard__note">
@@ -165,7 +160,7 @@ export function Dashboard() {
                     <FontAwesomeIcon icon={faListCheck} /> 8 Questions
                   </p>
                   <a className="dashboard__primary" href="/tests">
-                    Begin Assessment →
+                    Begin Test →
                   </a>
                 </div>
               </section>
@@ -202,7 +197,7 @@ export function Dashboard() {
               <section className="dashboard__card">
                 <div className="d-flex justify-content-between align-items-start gap-2 mb-1">
                   <h2 className="dashboard__card-title mb-0">Skill Holdings Breakdown</h2>
-                  <a className="dashboard__link" href="/wallet">
+                  <a className="dashboard__link" href="/my-vault">
                     Manage →
                   </a>
                 </div>

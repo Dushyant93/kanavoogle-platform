@@ -6,7 +6,7 @@ export const assessmentPaths = {
   take: (id: string) => `/tests/take?id=${encodeURIComponent(id)}`,
   result: (id: string) => `/tests/result?id=${encodeURIComponent(id)}`,
   dashboard: '/student',
-  vault: '/wallet',
+  vault: '/my-vault',
 } as const
 
 export function idFromUrl() {

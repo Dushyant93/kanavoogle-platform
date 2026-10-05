@@ -5,7 +5,7 @@ import Form from 'react-bootstrap/Form'
 import { useSkillOptions } from '../../hooks/useAssessmentFlow'
 import { assessmentFlowService } from '../../services/assessmentFlowService'
 import type { Complexity } from '../../types/assessment'
-import { AGE_GROUPS, type AgeGroup, type StartAssessmentRequest } from '../../types/assessmentFlow'
+import type { StartAssessmentRequest } from '../../types/assessmentFlow'
 import type { Skill } from '../../types/skills'
 import { toErrorMessage } from '../../utils/errors'
 import { AssessmentLayout, ErrorBlock, LoadingBlock } from './AssessmentLayout'
@@ -30,7 +30,6 @@ function StartForm({ skills }: { skills: Skill[] }) {
   const [skillId, setSkillId] = useState(skills[0]?.id ?? '')
   const [subSkillId, setSubSkillId] = useState(skills[0]?.subSkills.find((item) => item.active)?.id ?? '')
   const [complexity, setComplexity] = useState<Complexity>('INTERMEDIATE')
-  const [ageGroup, setAgeGroup] = useState<AgeGroup>('15-16')
   const [questionCount, setQuestionCount] = useState('45')
   const [submitted, setSubmitted] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -60,7 +59,6 @@ function StartForm({ skills }: { skills: Skill[] }) {
       complexity,
       questionCount: count,
       context: '',
-      ageGroup,
     }
 
     setBusy(true)
@@ -141,23 +139,6 @@ function StartForm({ skills }: { skills: Skill[] }) {
         </div>
       </fieldset>
 
-      <fieldset className="mb-4">
-        <legend className="tests-label">Age Group</legend>
-        <div className="tests-age">
-          {AGE_GROUPS.map((group) => (
-            <button
-              key={group}
-              type="button"
-              aria-pressed={group === ageGroup}
-              className={`tests-age__option${group === ageGroup ? ' is-selected' : ''}`}
-              onClick={() => setAgeGroup(group)}
-            >
-              {group.replace('-', '–')} yrs
-            </button>
-          ))}
-        </div>
-      </fieldset>
-
       <Form.Group className="mb-4" controlId="config-count">
         <Form.Label className="tests-label">Number of Questions</Form.Label>
         <Form.Control
@@ -181,7 +162,7 @@ function StartForm({ skills }: { skills: Skill[] }) {
           Cancel
         </a>
         <button type="submit" className="tests-btn tests-btn--primary" disabled={busy}>
-          {busy ? 'Preparing questions...' : 'Launch Assessment'} <FontAwesomeIcon icon={faChevronRight} />
+          {busy ? 'Preparing questions...' : 'Launch Test'} <FontAwesomeIcon icon={faChevronRight} />
         </button>
       </div>
     </Form>
@@ -194,7 +175,7 @@ export function AssessmentConfig() {
 
   return (
     <AssessmentLayout narrow>
-      <h1 className="tests-title">Start Assessment</h1>
+      <h1 className="tests-title">Start Test</h1>
       <p className="tests-subtitle mb-4">
         Configure your competency evaluation, select target sub-skills, and calibrate test difficulty to mint verified
         Skill-Coins.
