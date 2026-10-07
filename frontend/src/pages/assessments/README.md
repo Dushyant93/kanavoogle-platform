@@ -4,7 +4,7 @@ Five student screens: My Tests, Start Test, Questions, Test Complete and Test Re
 
 After **Submit**, the student sees **Test Complete**: a positive remark and how many they got right, then **View Report** for the full report. There are no letter grades. Below 30% (`LOW_SCORE_PERCENT` in `assessmentFormat.ts`) the score is hidden and only encouragement is shown.
 
-The number of questions comes from the student's age at registration, not from the Start Test screen: 13–14 → 10, 15–16 → 15, 17–19 → 20. Change `QUESTIONS_BY_AGE` in `assessmentFormat.ts` to adjust. The backend currently allows at most 15.
+The number of questions comes from the student's age at registration, not from the Start Test screen: 13–14 → 10, 15–16 → 15, 17–19 → 20. Change `QUESTIONS_BY_AGE` in `assessmentFormat.ts` to adjust. For now every test has at most `MAX_QUESTIONS_PER_TEST` (10) questions: the question bank has 10 per sub-skill and level, and the backend allows 3 to 15. Raise it once the bank and the backend limit grow.
 
 | Screen | URL | File |
 |---|---|---|
@@ -56,7 +56,7 @@ Production builds always use the real API. All calls go through the shared `http
 
 The types are in `src/types/assessmentFlow.ts` and build on the shared `Assessment`, `Skill` and `AssessmentResult` types. Fields marked optional can be left out; the screen hides that part.
 
-**`GET /api/assessments`**: the student's assessments, newest first. Returns `AssessmentListItem[]`, which is `Assessment` plus these optional fields:
+**`GET /api/assessments`** (not in the backend yet): the student's assessments, newest first. Until it exists, My Tests falls back to **`GET /api/assessments/recent`** (latest 10). Returns `AssessmentListItem[]`, which is `Assessment` plus these optional fields:
 
 ```json
 { "title": "Task deadline management", "questionCount": 40, "coinsAwarded": 1 }
@@ -77,6 +77,8 @@ Returns the new `Assessment`. The screen then goes to `/tests/take?id=<id>`.
 
 **`GET /api/assessments/:id`**: the existing endpoint. Returns `Assessment` with `questions`. Only send questions that passed the validator, and never include the correct answers.
 
+The Questions screen handles all three backend question types: `MULTIPLE_CHOICE` (option buttons), `TRUE_FALSE` (True / False buttons, also when `options` is empty) and `SHORT_TEXT` (a text box). Answers are trimmed before submit; the backend needs every question answered.
+
 **`POST /api/assessments/:id/submit`**: the same endpoint `resultsService` uses, with time per question added:
 
 ```json
@@ -86,7 +88,9 @@ Returns the new `Assessment`. The screen then goes to `/tests/take?id=<id>`.
 
 Returns `AssessmentReport` (below).
 
-**`GET /api/assessments/:id/result`** (new): returns `AssessmentReport` so the result can be reopened later from the list. If it doesn't exist yet, the screen falls back to the result saved at submit time.
+**`GET /api/assessments/:id/result`** (not in the backend yet): returns `AssessmentReport` so the result can be reopened later from the list. Until it exists, the screen uses the result saved at submit time, or builds a basic report (score and correct count) from `GET /api/assessments/:id`.
+
+A missing endpoint comes back from the backend as 404/405, or as an empty 403 because of the JWT filter. The screens treat all three as "not there yet" and use the fallback. The fallback calls check access the same way, so a real access problem still shows as an error.
 
 `AssessmentReport` is the shared `AssessmentResult` plus these optional fields:
 
@@ -97,19 +101,16 @@ Returns `AssessmentReport` (below).
   "totalQuestions": 8,
   "studentName": "Alex Morgan",
   "studentId": "SC-882194",
-  "grade": "A+",
   "coinsEarned": 3,
   "timeTakenSeconds": 795,
   "competencies": [
     { "subSkillName": "Design Thinking", "masteryPercent": 100, "pointsEarned": 20, "pointsPossible": 20,
       "evidence": ["Q1 User Persona Synthesis", "Q2 Empathy Journey Mapping"] }
-  ],
-  "credential": { "credentialId": "SC-CERT-2024-88A9F", "ledgerHash": "0x7A3F...", "anchored": true,
-                  "verifiedBy": "Academic Consensus Node" }
+  ]
 }
 ```
 
-If `grade` is missing, the screen uses placeholder bands (A+ ≥ 95, A ≥ 85, and so on) until the team agrees the real scale. If `timeTakenSeconds` is missing, it uses `completedAt − createdAt`. If `credential` is missing or `anchored` is false, the screen shows "Verification Pending" instead of "Official Credential". Only the credential ID and hash come from Hyperledger; everything else is MongoDB data.
+If `timeTakenSeconds` is missing, it uses `completedAt − createdAt`. If `coinsEarned` is missing, the report shows the coin status from `coinAllocationStatus`; any `PENDING_...` status shows as "Skill Coins pending".
 
 The mock competency grouping (two questions per competency, 10 points each) is only a placeholder. The real mapping of questions to competencies and points should come from the backend.
 

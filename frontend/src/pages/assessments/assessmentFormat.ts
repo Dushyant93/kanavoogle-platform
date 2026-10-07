@@ -52,12 +52,23 @@ const QUESTIONS_BY_AGE: { minAge: number; maxAge: number; questions: number }[] 
 ]
 const DEFAULT_QUESTIONS = 10
 
+// The question bank has 10 questions per sub-skill and level, and the backend refuses a
+// test it can't fill ("Not enough approved questions"). Its hard limit is 15. Until the bank
+// grows, ask for at most this many so every student can start a test.
+export const MAX_QUESTIONS_PER_TEST = 10
+
 function ageBand(age: number | null | undefined) {
   return QUESTIONS_BY_AGE.find((band) => age != null && age >= band.minAge && age <= band.maxAge)
 }
 
 export function questionCountForAge(age: number | null | undefined) {
-  return ageBand(age)?.questions ?? DEFAULT_QUESTIONS
+  return Math.min(ageBand(age)?.questions ?? DEFAULT_QUESTIONS, MAX_QUESTIONS_PER_TEST)
+}
+
+/** Text for the coin status chip, e.g. "PENDING_STAKEHOLDER_RULES" -> "Skill Coins pending". */
+export function coinStatusLabel(status: string | null | undefined) {
+  if (!status || status.toUpperCase().startsWith('PENDING')) return 'Skill Coins pending'
+  return `Skill Coins ${status.toLowerCase().replace(/_/g, ' ')}`
 }
 
 /** Score out of 100 for a finished test. */
