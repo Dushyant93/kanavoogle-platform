@@ -1,14 +1,15 @@
 import { useState, type FormEvent } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCheck, faChevronRight } from '@fortawesome/free-solid-svg-icons'
+import { faCheck, faChevronRight, faListOl } from '@fortawesome/free-solid-svg-icons'
 import Form from 'react-bootstrap/Form'
-import { useSkillOptions } from '../../hooks/useAssessmentFlow'
+import { useCurrentStudent, useSkillOptions } from '../../hooks/useAssessmentFlow'
 import { assessmentFlowService } from '../../services/assessmentFlowService'
 import type { Complexity } from '../../types/assessment'
 import type { StartAssessmentRequest } from '../../types/assessmentFlow'
 import type { Skill } from '../../types/skills'
 import { toErrorMessage } from '../../utils/errors'
 import { AssessmentLayout, ErrorBlock, LoadingBlock } from './AssessmentLayout'
+import { questionCountForAge } from './assessmentFormat'
 import { assessmentPaths } from './paths'
 
 const DIFFICULTY_OPTIONS: {
@@ -23,14 +24,10 @@ const DIFFICULTY_OPTIONS: {
   { value: 'ADVANCED', label: 'High', reward: 3, caption: 'Mastery' },
 ]
 
-const MIN_QUESTIONS = 5
-const MAX_QUESTIONS = 60
-
-function StartForm({ skills }: { skills: Skill[] }) {
+function StartForm({ skills, age }: { skills: Skill[]; age: number | null }) {
   const [skillId, setSkillId] = useState(skills[0]?.id ?? '')
   const [subSkillId, setSubSkillId] = useState(skills[0]?.subSkills.find((item) => item.active)?.id ?? '')
   const [complexity, setComplexity] = useState<Complexity>('INTERMEDIATE')
-  const [questionCount, setQuestionCount] = useState('45')
   const [submitted, setSubmitted] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -38,9 +35,9 @@ function StartForm({ skills }: { skills: Skill[] }) {
   const skill = skills.find((item) => item.id === skillId)
   const subSkills = skill?.subSkills.filter((item) => item.active) ?? []
 
-  const count = Number(questionCount)
-  const countValid = Number.isInteger(count) && count >= MIN_QUESTIONS && count <= MAX_QUESTIONS
-  const formValid = Boolean(skillId && subSkillId && countValid)
+  // Set by age group from registration; the student doesn't choose it.
+  const count = questionCountForAge(age)
+  const formValid = Boolean(skillId && subSkillId)
 
   function handleSkillChange(nextSkillId: string) {
     setSkillId(nextSkillId)
@@ -139,23 +136,10 @@ function StartForm({ skills }: { skills: Skill[] }) {
         </div>
       </fieldset>
 
-      <Form.Group className="mb-4" controlId="config-count">
-        <Form.Label className="tests-label">Number of Questions</Form.Label>
-        <Form.Control
-          className="tests-config__count"
-          type="number"
-          inputMode="numeric"
-          min={MIN_QUESTIONS}
-          max={MAX_QUESTIONS}
-          value={questionCount}
-          isInvalid={submitted && !countValid}
-          onChange={(event) => setQuestionCount(event.target.value)}
-        />
-        <Form.Text className="tests-hint">Recommended: 30–50 questions</Form.Text>
-        <Form.Control.Feedback type="invalid">
-          Enter a number between {MIN_QUESTIONS} and {MAX_QUESTIONS}.
-        </Form.Control.Feedback>
-      </Form.Group>
+      <div className="tests-config__count-info mb-4">
+        <FontAwesomeIcon icon={faListOl} aria-hidden="true" />
+        <strong>{count} questions</strong>
+      </div>
 
       <div className="tests-config__actions">
         <a className="tests-btn tests-btn--ghost" href={assessmentPaths.list}>
@@ -172,20 +156,20 @@ function StartForm({ skills }: { skills: Skill[] }) {
 export function AssessmentConfig() {
   const { data, loading, error } = useSkillOptions()
   const skills = (data ?? []).filter((skill) => skill.active)
+  const age = useCurrentStudent()?.studentProfile?.age ?? null
 
   return (
     <AssessmentLayout narrow>
       <h1 className="tests-title">Start Test</h1>
       <p className="tests-subtitle mb-4">
-        Configure your competency evaluation, select target sub-skills, and calibrate test difficulty to mint verified
-        Skill-Coins.
+        Choose a skill, a sub-skill and a difficulty level for your test.
       </p>
       {loading ? <LoadingBlock label="Loading skills" /> : null}
       {error ? <ErrorBlock message={error} /> : null}
       {!loading && !error && skills.length === 0 ? (
         <div className="tests-empty">No skills are available yet. Please check back later.</div>
       ) : null}
-      {!loading && !error && skills.length > 0 ? <StartForm skills={skills} /> : null}
+      {!loading && !error && skills.length > 0 ? <StartForm skills={skills} age={age} /> : null}
     </AssessmentLayout>
   )
 }

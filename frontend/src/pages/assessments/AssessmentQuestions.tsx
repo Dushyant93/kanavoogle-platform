@@ -50,7 +50,7 @@ function QuestionRunner({ assessment }: { assessment: Assessment }) {
     const body: SubmitAnswersRequest = { responses, timeSpentMs: timeSpent.current }
     try {
       await assessmentFlowService.submit(assessment.id, body)
-      window.location.assign(assessmentPaths.result(assessment.id))
+      window.location.assign(assessmentPaths.complete(assessment.id))
     } catch (err) {
       setError(toErrorMessage(err))
       setSubmitting(false)
