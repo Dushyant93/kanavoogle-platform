@@ -49,7 +49,7 @@ function ReportCard({ report, studentName }: { report: AssessmentReport; student
       <div className="tests-result__top">
         {credential?.anchored ? (
           <span className="tests-badge tests-badge--success tests-badge--caps">
-            <FontAwesomeIcon icon={faCircleCheck} /> Official Credential
+            <FontAwesomeIcon icon={faCircleCheck} />
           </span>
         ) : (
           <span className="tests-badge tests-badge--pending tests-badge--caps">Verification Pending</span>
@@ -156,7 +156,7 @@ async function shareResult() {
   const url = window.location.href
   try {
     if (navigator.share) {
-      await navigator.share({ title: 'My assessment result', url })
+      await navigator.share({ title: 'My test result', url })
     } else {
       await navigator.clipboard.writeText(url)
       window.alert('Link copied to clipboard')
@@ -187,7 +187,7 @@ export function AssessmentResult() {
 
   return (
     <AssessmentLayout narrow subbar={subbar}>
-      {!id ? <ErrorBlock message="No assessment selected." /> : null}
+      {!id ? <ErrorBlock message="No test selected." /> : null}
       {id && loading ? <LoadingBlock label="Loading result" /> : null}
       {id && error ? <ErrorBlock message={error} /> : null}
       {data ? <ReportCard report={data} studentName={student?.displayName ?? 'Student'} /> : null}

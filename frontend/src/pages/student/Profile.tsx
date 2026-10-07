@@ -49,7 +49,6 @@ export function Profile() {
   const [graduation, setGraduation] = useState<(typeof GRADUATIONS)[number]>('Spring 2026')
   const [publicProfile, setPublicProfile] = useState(true)
   const [employerVisibility, setEmployerVisibility] = useState(true)
-  const [mintAlerts, setMintAlerts] = useState(true)
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
@@ -331,22 +330,6 @@ export function Profile() {
                       aria-label="Employer visibility"
                     />
                   </div>
-                  <div className="profile__toggle">
-                    <div>
-                      <strong>Notify on SkillCoin Minting</strong>
-                      <p>Push alerts whenever new competency tokens arrive in wallet</p>
-                    </div>
-                    <Form.Check
-                      type="switch"
-                      id="mint-alerts"
-                      checked={mintAlerts}
-                      onChange={(event) => {
-                        setMintAlerts(event.target.checked)
-                        setSaved(false)
-                      }}
-                      aria-label="Notify on SkillCoin minting"
-                    />
-                  </div>
                 </section>
 
                 <section className="profile__card" aria-labelledby="wallet-verification">
@@ -366,7 +349,7 @@ export function Profile() {
                       <p className="profile__address">0x8824A12B…e9f4</p>
                     </div>
                   </div>
-                  <a className="profile__manage" href="/wallet">
+                  <a className="profile__manage" href="/my-vault">
                     Manage Wallet <FontAwesomeIcon icon={faChevronRight} />
                   </a>
                 </section>
