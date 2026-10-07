@@ -4,6 +4,7 @@ export const assessmentPaths = {
   list: '/tests',
   start: '/tests/new',
   take: (id: string) => `/tests/take?id=${encodeURIComponent(id)}`,
+  complete: (id: string) => `/tests/complete?id=${encodeURIComponent(id)}`,
   result: (id: string) => `/tests/result?id=${encodeURIComponent(id)}`,
   dashboard: '/student',
   vault: '/my-vault',

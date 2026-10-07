@@ -193,12 +193,13 @@ function seed(
 }
 
 const SEED: AssessmentListItem[] = [
-  seed('a-101', 'Advanced Algorithms & Data Structures Final', 'Creativity & Innovation', 'Design Thinking', 'ADVANCED', 45, 92, '2024-10-14T10:00:00', '2024-10-14T11:45:00'),
-  seed('a-102', 'Task deadline management', 'Time Management', 'Prioritization Techniques', 'FOUNDATION', 40, 95, '2024-09-28T16:00:00', '2024-09-28T17:15:00'),
-  seed('a-103', 'Digital Ethics & AI Governance Milestone', 'Digital Use', 'Algorithmic Accountability', 'INTERMEDIATE', 35, 88, '2024-09-15T14:00:00', '2024-09-15T15:00:00'),
-  seed('a-104', 'Team Communication Check-in', 'Communication', 'Active Listening', 'INTERMEDIATE', 30, null, '2024-09-10T09:00:00', null),
-  seed('a-105', 'Problem Solving Sprint', 'Problem Solving', 'Root Cause Analysis', 'ADVANCED', 50, 81, '2024-09-02T13:00:00', '2024-09-02T14:20:00'),
-  seed('a-106', 'Spreadsheet Basics Practice', 'Digital Use', 'Data Handling', 'FOUNDATION', 30, null, '2024-08-27T11:00:00', null),
+  seed('a-101', 'Advanced Algorithms & Data Structures Final', 'Creativity & Innovation', 'Design Thinking', 'ADVANCED', 15, 92, '2024-10-14T10:00:00', '2024-10-14T11:45:00'),
+  seed('a-102', 'Task deadline management', 'Time Management', 'Prioritization Techniques', 'FOUNDATION', 10, 95, '2024-09-28T16:00:00', '2024-09-28T17:15:00'),
+  seed('a-103', 'Digital Ethics & AI Governance Milestone', 'Digital Use', 'Algorithmic Accountability', 'INTERMEDIATE', 15, 88, '2024-09-15T14:00:00', '2024-09-15T15:00:00'),
+  seed('a-104', 'Team Communication Check-in', 'Communication', 'Active Listening', 'INTERMEDIATE', 15, null, '2024-09-10T09:00:00', null),
+  seed('a-105', 'Problem Solving Sprint', 'Problem Solving', 'Root Cause Analysis', 'ADVANCED', 20, 81, '2024-09-02T13:00:00', '2024-09-02T14:20:00'),
+  seed('a-106', 'Spreadsheet Basics Practice', 'Digital Use', 'Data Handling', 'FOUNDATION', 10, null, '2024-08-27T11:00:00', null),
+  seed('a-107', 'Logic Puzzles Practice', 'Problem Solving', 'Logical Reasoning', 'FOUNDATION', 10, 20, '2024-08-20T10:00:00', '2024-08-20T10:25:00'),
 ]
 
 function readJson<T>(key: string, fallback: T): T {
@@ -235,14 +236,14 @@ function delay<T>(value: T): Promise<T> {
 }
 
 function notFound(): never {
-  throw new ApiError('Assessment not found', 404)
+  throw new ApiError('Test not found', 404)
 }
 
 // Placeholder grouping: every 2 questions count toward one competency, 10 pts each.
 // The real mapping of questions to competencies comes from the backend.
 const COMPETENCY_TEMPLATE = [
   { name: 'Design Thinking', evidence: ['User Persona Synthesis', 'Empathy Journey Mapping'] },
-  { name: 'MVP Prototyping', evidence: ['Paper Wireframing', 'Minimum Viable Arch.'] },
+  { name: 'MVP Prototyping', evidence: ['Paper Wireframing', 'Minimum Viable Product'] },
   { name: 'Risk Mitigation', evidence: ['Failure Mode Matrix', 'Contingency Budgeting'] },
   { name: 'Ideation & Pitching', evidence: ['Value Proposition Pitch', 'Stakeholder Buy-in'] },
 ]

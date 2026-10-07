@@ -2,12 +2,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faArrowLeft,
   faCalendar,
-  faCircleCheck,
   faCoins,
   faFilePdf,
-  faQrcode,
+  faSeedling,
   faShareNodes,
-  faShieldHalved,
   faVault,
 } from '@fortawesome/free-solid-svg-icons'
 import Col from 'react-bootstrap/Col'
@@ -18,7 +16,7 @@ import { useAssessmentReport, useCurrentStudent } from '../../hooks/useAssessmen
 import type { AssessmentReport } from '../../types/assessmentFlow'
 import { formatLabel } from '../../utils/format'
 import { AssessmentLayout, ErrorBlock, LoadingBlock } from './AssessmentLayout'
-import { formatDuration, formatShortDate, gradeFor } from './assessmentFormat'
+import { formatDuration, formatShortDate, isLowScore, percentFor, remarkFor } from './assessmentFormat'
 import { assessmentPaths, idFromUrl } from './paths'
 
 function timeTaken(report: AssessmentReport) {
@@ -31,29 +29,20 @@ function timeTaken(report: AssessmentReport) {
 
 function ReportCard({ report, studentName }: { report: AssessmentReport; studentName: string }) {
   const { assessment } = report
-  const percent = Math.round(
-    assessment.weightedPercent ??
-      assessment.rawPercent ??
-      (report.totalQuestions ? (report.correctAnswers / report.totalQuestions) * 100 : 0),
-  )
+  const percent = percentFor(report)
+  const low = isLowScore(percent)
+  const remark = remarkFor(percent)
   const competencies = report.competencies ?? []
   const mastered = competencies.filter((item) => item.masteryPercent >= 100).length
   const hasPoints = competencies.length > 0 && competencies.every((item) => item.pointsPossible != null)
   const pointsEarned = competencies.reduce((sum, item) => sum + (item.pointsEarned ?? 0), 0)
   const pointsPossible = competencies.reduce((sum, item) => sum + (item.pointsPossible ?? 0), 0)
-  const credential = report.credential
   const seconds = timeTaken(report)
 
   return (
     <article className="tests-card tests-result">
       <div className="tests-result__top">
-        {credential?.anchored ? (
-          <span className="tests-badge tests-badge--success tests-badge--caps">
-            <FontAwesomeIcon icon={faCircleCheck} />
-          </span>
-        ) : (
-          <span className="tests-badge tests-badge--pending tests-badge--caps">Verification Pending</span>
-        )}
+        <span className="tests-result__kicker">Test Report</span>
         <span className="tests-result__date">
           <FontAwesomeIcon icon={faCalendar} /> {formatShortDate(assessment.completedAt ?? assessment.createdAt)}
         </span>
@@ -72,29 +61,41 @@ function ReportCard({ report, studentName }: { report: AssessmentReport; student
             </>
           ) : null}
         </p>
-        <div className="tests-result__percent">{percent}%</div>
-        <p className="tests-result__grade">
-          <strong>Grade {report.grade ?? gradeFor(percent)}</strong> ({report.correctAnswers} of{' '}
-          {report.totalQuestions} Correct)
-        </p>
-        {report.coinsEarned != null ? (
+        {low ? (
+          <>
+            <div className="tests-result__encourage">
+              <FontAwesomeIcon icon={faSeedling} aria-hidden="true" /> {remark.title}
+            </div>
+            <p className="tests-result__grade">{remark.message}</p>
+          </>
+        ) : (
+          <>
+            <div className="tests-result__percent">{percent}%</div>
+            <p className="tests-result__grade">
+              <strong>{remark.title}</strong> {report.correctAnswers} out of {report.totalQuestions} correct
+            </p>
+          </>
+        )}
+        {report.coinsEarned === 0 ? null : report.coinsEarned != null ? (
           <span className="tests-coins tests-coins--lg">
-            <FontAwesomeIcon icon={faCoins} /> +{report.coinsEarned} Skill Coins Earned
+            <FontAwesomeIcon icon={faCoins} /> +{report.coinsEarned} Skill Coins earned
             {seconds != null ? <span className="tests-coins__time">• {formatDuration(seconds)}</span> : null}
           </span>
         ) : (
-          <span className="tests-chip">Coins {formatLabel(assessment.coinAllocationStatus)}</span>
+          <span className="tests-chip">Skill Coins {formatLabel(assessment.coinAllocationStatus)}</span>
         )}
       </div>
 
       {competencies.length > 0 ? (
         <>
           <div className="tests-result__section-head">
-            <h2 className="tests-result__section-title">Competencies Validated</h2>
-            <span className="tests-chip tests-chip--success tests-chip--plain">
-              {mastered} of {competencies.length} Mastered
-              {hasPoints ? ` (${pointsEarned}/${pointsPossible} pts)` : ''}
-            </span>
+            <h2 className="tests-result__section-title">{mastered > 0 ? 'Competencies Validated' : 'What You Practised'}</h2>
+            {mastered > 0 ? (
+              <span className="tests-chip tests-chip--success tests-chip--plain">
+                {mastered} of {competencies.length} Mastered
+                {hasPoints ? ` (${pointsEarned}/${pointsPossible} pts)` : ''}
+              </span>
+            ) : null}
           </div>
           <Row className="g-3">
             {competencies.map((item) => (
@@ -102,10 +103,14 @@ function ReportCard({ report, studentName }: { report: AssessmentReport; student
                 <div className="tests-competency">
                   <div className="d-flex justify-content-between align-items-center mb-2">
                     <strong>{item.subSkillName}</strong>
-                    <span className="tests-competency__percent">
-                      <b>{Math.round(item.masteryPercent)}%</b>
-                      {item.pointsPossible != null ? ` • ${item.pointsEarned ?? 0}/${item.pointsPossible} pts` : ''}
-                    </span>
+                    {isLowScore(item.masteryPercent) ? (
+                      <span className="tests-competency__percent">Keep practising</span>
+                    ) : (
+                      <span className="tests-competency__percent">
+                        <b>{Math.round(item.masteryPercent)}%</b>
+                        {item.pointsPossible != null ? ` • ${item.pointsEarned ?? 0}/${item.pointsPossible} pts` : ''}
+                      </span>
+                    )}
                   </div>
                   <ProgressBar now={item.masteryPercent} className="tests-competency__bar" />
                   <div className="d-flex flex-wrap gap-2 mt-2">
@@ -122,27 +127,9 @@ function ReportCard({ report, studentName }: { report: AssessmentReport; student
         </>
       ) : null}
 
-      {credential ? (
-        <div className="tests-ledger" title={credential.ledgerHash}>
-          <span className="tests-ledger__qr" aria-hidden="true">
-            <FontAwesomeIcon icon={faQrcode} />
-          </span>
-          <div className="tests-ledger__text">
-            <code>{credential.credentialId}</code>
-            <small>Verified by {credential.verifiedBy ?? 'Kanavoogle Credential Ledger'}</small>
-          </div>
-          <span className="tests-chip">{credential.anchored ? 'Confirmed' : 'Pending'}</span>
-          {credential.anchored ? (
-            <span className="tests-ledger__check" aria-label="Verified">
-              <FontAwesomeIcon icon={faShieldHalved} />
-            </span>
-          ) : null}
-        </div>
-      ) : null}
-
       <div className="tests-result__actions">
         <a className="tests-btn tests-btn--outline" href={assessmentPaths.vault}>
-          <FontAwesomeIcon icon={faVault} /> Back to Vault
+          <FontAwesomeIcon icon={faVault} /> Back to My Vault
         </a>
         <button type="button" className="tests-btn tests-btn--primary" onClick={() => window.print()}>
           <FontAwesomeIcon icon={faFilePdf} /> Print / Save PDF
@@ -175,7 +162,7 @@ export function AssessmentResult() {
     <div className="tests-subbar">
       <Container fluid className="d-flex align-items-center gap-3">
         <a href={assessmentPaths.vault}>
-          <FontAwesomeIcon icon={faArrowLeft} /> Back to Vault
+          <FontAwesomeIcon icon={faArrowLeft} /> Back to My Vault
         </a>
         <span className="tests-subbar__divider" aria-hidden="true" />
         <button type="button" onClick={shareResult}>
