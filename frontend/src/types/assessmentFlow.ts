@@ -8,7 +8,7 @@ import type { AssessmentResult } from './results'
 export const AGE_GROUPS = ['13-14', '15-16', '17-19'] as const
 export type AgeGroup = (typeof AGE_GROUPS)[number]
 
-/** One row on the Assessment List screen. GET /assessments returns an array of these. */
+/** One row on the Assessment List screen. GET /assessments/recent returns an array of these. */
 export type AssessmentListItem = Assessment & {
   title?: string
   questionCount?: number

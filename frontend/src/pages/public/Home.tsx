@@ -1,8 +1,11 @@
+import { useEffect, useState } from 'react'
 import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
+import { useAuth } from '../../hooks/useAuth'
 import { Footer } from '../../layout/Footer'
 import { Header } from '../../layout/Header'
+import { skillsService } from '../../services/skillsService'
 import '../../styles/style.css'
 
 const JOURNEY = [
@@ -63,9 +66,46 @@ function RoleIcon({ name }: { name: (typeof ROLES)[number]['icon'] }) {
 }
 
 export function Home() {
+  const { user } = useAuth()
+  const [skillFamilies, setSkillFamilies] = useState<number | null>(null)
+  const [subSkillCount, setSubSkillCount] = useState<number | null>(null)
+  const yearLevel = user?.studentProfile?.yearLevel
+
+  useEffect(() => {
+    let active = true
+    skillsService
+      .list()
+      .then((skills) => {
+        if (!active) return
+        const activeSkills = skills.filter((skill) => skill.active)
+        setSkillFamilies(activeSkills.length)
+        setSubSkillCount(
+          activeSkills.reduce((count, skill) => count + skill.subSkills.filter((item) => item.active).length, 0),
+        )
+      })
+      .catch(() => {
+        if (!active) return
+        setSkillFamilies(null)
+        setSubSkillCount(null)
+      })
+    return () => {
+      active = false
+    }
+  }, [])
+
   return (
     <>
-      <Header user={null} />
+      <Header
+        user={null}
+        account={
+          user
+            ? {
+                name: user.displayName,
+                level: yearLevel != null ? `Year ${yearLevel}` : '',
+              }
+            : undefined
+        }
+      />
       <main className="home">
         <Container>
           <Row className="align-items-center g-4 g-lg-5">
@@ -93,13 +133,13 @@ export function Home() {
               <Row className="g-3">
                 <Col xs={6}>
                   <div className="home__stat">
-                    <div className="home__stat-value">7</div>
+                    <div className="home__stat-value">{skillFamilies ?? '—'}</div>
                     <div className="home__stat-label">Skill families</div>
                   </div>
                 </Col>
                 <Col xs={6}>
                   <div className="home__stat">
-                    <div className="home__stat-value">52</div>
+                    <div className="home__stat-value">{subSkillCount ?? '—'}</div>
                     <div className="home__stat-label">Sub-skills</div>
                   </div>
                 </Col>

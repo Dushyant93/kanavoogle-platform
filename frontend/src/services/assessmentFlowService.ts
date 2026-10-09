@@ -20,16 +20,19 @@ import { skillsService } from './skillsService'
 export const USE_ASSESSMENT_MOCKS = import.meta.env.DEV && import.meta.env.VITE_USE_MOCKS !== 'false'
 
 export const assessmentFlowService = {
-  /** GET /assessments — the signed-in student's assessments, newest first. */
+  /** GET /assessments/recent — the signed-in student's latest assessments, newest first. */
   list(): Promise<AssessmentListItem[]> {
-    if (USE_ASSESSMENT_MOCKS) return assessmentMocks.list()
-    return request<AssessmentListItem[]>('/assessments')
+    return assessmentService.recent()
   },
 
   /** GET /skills — reuses the shared skills service. */
   skills(): Promise<Skill[]> {
-    if (USE_ASSESSMENT_MOCKS) return assessmentMocks.skills()
     return skillsService.list()
+  },
+
+  /** GET /skills/:id — one skill, including its sub-skills. */
+  skill(id: string): Promise<Skill> {
+    return skillsService.get(id)
   },
 
   /** POST /assessments — reuses the shared assessment service. */

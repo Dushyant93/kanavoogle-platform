@@ -40,7 +40,7 @@ public class AssessmentService {
     public record Submit(Map<String, String> responses) {
     }
 
-    public record Result(View assessment, int correctAnswers, int totalQuestions) {
+    public record Result(View assessment, int correctAnswers, int totalQuestions, String studentName, String grade) {
     }
 
     public View create(Create r) {
@@ -118,7 +118,14 @@ public class AssessmentService {
         a.setStatus("COMPLETED");
         a.setCompletedAt(Instant.now());
         a = attempts.save(a);
-        return new Result(view(a), correct, a.getQuestions().size());
+        UserAccount u = student();
+        return new Result(view(a), correct, a.getQuestions().size(), u.getDisplayName(), grade(a.getWeightedPercent()));
+    }
+
+    public Result result(String id) {
+        AssessmentAttempt a = owned(id);
+        if (!"COMPLETED".equals(a.getStatus())) throw new IllegalStateException("Assessment is not completed");
+        return new Result(view(a), countCorrect(a), a.getQuestions().size(), student().getDisplayName(), grade(a.getWeightedPercent()));
     }
 
     private UserAccount student() {
@@ -178,6 +185,26 @@ public class AssessmentService {
         String x = (v == null ? "General" : v).replaceAll("[^A-Za-z0-9 &/()'.,+-]", "").trim();
         if (x.isBlank()) x = "General";
         return x.substring(0, Math.min(80, x.length()));
+    }
+
+    private int countCorrect(AssessmentAttempt a) {
+        int correct = 0;
+        Map<String, String> responses = a.getResponses() == null ? Map.of() : a.getResponses();
+        for (var q : a.getQuestions()) {
+            String ans = responses.get(q.getQuestionId());
+            if (ans != null && q.getCorrectAnswer() != null && q.getCorrectAnswer().equalsIgnoreCase(ans)) correct++;
+        }
+        return correct;
+    }
+
+    private String grade(Double percent) {
+        double value = percent == null ? 0 : percent;
+        if (value >= 95) return "A+";
+        if (value >= 85) return "A";
+        if (value >= 75) return "B";
+        if (value >= 65) return "C";
+        if (value >= 50) return "D";
+        return "F";
     }
 
     private double weight(Complexity c) {

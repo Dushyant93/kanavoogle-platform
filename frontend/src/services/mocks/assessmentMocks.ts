@@ -274,8 +274,6 @@ function reportFor(item: AssessmentListItem, correct?: boolean[], timeTakenSecon
     assessment: item,
     correctAnswers: flags.filter(Boolean).length,
     totalQuestions: flags.length,
-    studentName: 'Alex Morgan',
-    studentId: 'SC-882194',
     coinsEarned: item.coinsAwarded ?? null,
     timeTakenSeconds: timeTakenSeconds ?? Math.max(0, Math.round((finished - started) / 1000)),
     competencies: competenciesFrom(flags),

@@ -1,44 +1,63 @@
+import Alert from 'react-bootstrap/Alert'
 import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
 import ProgressBar from 'react-bootstrap/ProgressBar'
 import Row from 'react-bootstrap/Row'
+import Spinner from 'react-bootstrap/Spinner'
+import { useAuth } from '../../hooks/useAuth'
+import { useStudent } from '../../hooks/useStudent'
+import { useWallet } from '../../hooks/useWallet'
 import { Footer } from '../../layout/Footer'
 import { Header } from '../../layout/Header'
-import type { User } from '../../types/auth'
+import { formatDate, formatLabel } from '../../utils/format'
 import '../../styles/style.css'
 
-const student: User = {
-  id: 'student-1',
-  email: 'alex.morgan@example.com',
-  displayName: 'Alex Morgan',
-  role: 'STUDENT',
-  verificationStatus: 'NOT_REQUIRED',
-  studentProfile: {
-    age: 15,
-    yearLevel: 4,
-    schoolName: 'Kanavoogle',
-    region: 'Sydney',
-    skillSharingConsent: true,
-  },
-}
-
-const DOMAINS = [
-  { code: 'CI', name: 'Creativity & Innovation', amountLabel: '18 Skill Coines', percent: 37.5, tone: 'gold' },
-  { code: 'PS', name: 'Problem Solving', amountLabel: '15 Skill Coines', percent: 31.2, tone: 'green' },
-  { code: 'CM', name: 'Communication', amountLabel: '9 Skill Coines', percent: 18.8, tone: 'purple' },
-  { code: 'DU', name: 'Digital Use', amountLabel: '6 Skill Coines', percent: 12.5, tone: 'navy' },
-] as const
-
-const EARNINGS = [
-  { title: 'Creativity & Innovation Test', meta: 'Scenario 08, Today 2:15 PM', coins: '+3 Skill Coines' },
-  { title: 'MVP Prototyping Milestone', meta: 'Verified by Faculty, Yesterday', coins: '+3 Skill Coines' },
-  { title: 'Campus Partner Workshop', meta: 'Design Thinking Lab, Oct 24', coins: '+2 Skill Coines' },
-] as const
+const TONES = ['gold', 'green', 'purple', 'navy'] as const
 
 export function SkillsWallet() {
+  const { user, loading: authLoading } = useAuth()
+  const { wallet, loading: walletLoading, error: walletError } = useWallet()
+  const { dashboard, loading: dashboardLoading, error: dashboardError } = useStudent()
+
+  const loading = authLoading || walletLoading || dashboardLoading
+  if (loading) {
+    return (
+      <>
+        <Header user={user} active="wallet" />
+        <main className="dashboard">
+          <Container className="text-center py-5">
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">Loading vault</span>
+            </Spinner>
+          </Container>
+        </main>
+        <Footer />
+      </>
+    )
+  }
+
+  if (!user) {
+    return (
+      <>
+        <Header user={null} active="wallet" />
+        <main className="dashboard">
+          <Container className="py-5">
+            <Alert variant="warning">You need to sign in to view your vault.</Alert>
+          </Container>
+        </main>
+        <Footer />
+      </>
+    )
+  }
+
+  const skills = wallet?.skills ?? []
+  const totalEvidence = skills.reduce((sum, skill) => sum + skill.evidenceScore, 0)
+  const averageEvidence = skills.length > 0 ? Math.round(totalEvidence / skills.length) : 0
+  const completed = (dashboard?.recentAssessments ?? []).filter((item) => item.completedAt)
+
   return (
     <>
-      <Header user={student} active="wallet" />
+      <Header user={user} active="wallet" />
       <main className="dashboard">
         <Container>
           <div className="d-flex flex-column flex-lg-row justify-content-lg-between align-items-lg-start gap-3 mb-4">
@@ -54,18 +73,29 @@ export function SkillsWallet() {
             </div>
           </div>
 
+          {walletError ? <Alert variant="danger">{walletError}</Alert> : null}
+          {dashboardError ? <Alert variant="danger">{dashboardError}</Alert> : null}
+
           <Row className="g-3">
             <Col lg={12}>
               <section className="dashboard__card">
-                <p className="dashboard__kicker">Total balance</p>
-                <p className="dashboard__balance">48 <span>Skill Coines</span></p>
-                <p className="dashboard__note">Skill-Coins Minted</p>
+                <p className="dashboard__kicker">Skills with evidence</p>
+                <p className="dashboard__balance">{skills.length}</p>
+                <p className="dashboard__note">
+                  {user.studentProfile?.schoolName ?? 'Completed tests grouped by skill'}
+                </p>
                 <div className="d-flex justify-content-between gap-3 flex-wrap mt-3">
-                  <p className="dashboard__progress-label mb-2">Level 4 Scholar</p>
-                  <p className="dashboard__unlock mb-2">48 / 60 Skill Coines</p>
+                  <p className="dashboard__progress-label mb-2">
+                    {user.studentProfile?.yearLevel != null ? `Year ${user.studentProfile.yearLevel}` : 'Average evidence'}
+                  </p>
+                  <p className="dashboard__unlock mb-2">{averageEvidence}% average evidence</p>
                 </div>
-                <ProgressBar now={80} className="dashboard__progress" />
-                <p className="dashboard__note mt-2">Earn 12 more Skill Coines to unlock Level 5 Master Tier</p>
+                <ProgressBar now={averageEvidence} className="dashboard__progress" />
+                <p className="dashboard__note mt-2">
+                  {skills.length === 0
+                    ? 'Complete a test to add a skill to your vault.'
+                    : 'Evidence scores come from your completed tests.'}
+                </p>
               </section>
             </Col>
           </Row>
@@ -75,41 +105,53 @@ export function SkillsWallet() {
               <section className="dashboard__card h-100">
                 <div className="d-flex justify-content-between align-items-center gap-2 mb-3">
                   <h2 className="dashboard__card-title mb-0">Skill Domain Portfolio</h2>
-                  <span className="dashboard__chip">4 Active Domains</span>
+                  <span className="dashboard__chip">{skills.length} Active Domains</span>
                 </div>
-                <Row className="g-3">
-                  {DOMAINS.map((domain) => (
-                    <Col key={domain.code} sm={6}>
-                      <article className="wallet__domain">
-                        <strong>{domain.name}</strong>
-                        <div className="d-flex justify-content-between wallet__domain-value">
-                          <span>{domain.amountLabel}</span>
-                          <span>{domain.percent}%</span>
-                        </div>
-                        <div className="wallet__domain-track">
-                          <div className={"wallet__domain-bar wallet__domain-bar--" + domain.tone} style={{ width: domain.percent + '%' }} />
-                        </div>
-                      </article>
-                    </Col>
-                  ))}
-                </Row>
+                {skills.length === 0 ? (
+                  <p className="dashboard__note">No skill evidence yet.</p>
+                ) : (
+                  <Row className="g-3">
+                    {skills.map((skill, index) => (
+                      <Col key={skill.skillId} sm={6}>
+                        <article className="wallet__domain">
+                          <strong>{skill.skillName}</strong>
+                          <div className="d-flex justify-content-between wallet__domain-value">
+                            <span>{skill.completedAssessments} tests</span>
+                            <span>{Math.round(skill.evidenceScore)}%</span>
+                          </div>
+                          <div className="wallet__domain-track">
+                            <div
+                              className={`wallet__domain-bar wallet__domain-bar--${TONES[index % TONES.length]}`}
+                              style={{ width: `${Math.min(100, Math.max(0, skill.evidenceScore))}%` }}
+                            />
+                          </div>
+                        </article>
+                      </Col>
+                    ))}
+                  </Row>
+                )}
               </section>
             </Col>
             <Col lg={5}>
               <section className="dashboard__card h-100">
                 <h2 className="dashboard__card-title mb-3">Recent Vault Earnings</h2>
-                <ul className="dashboard__results wallet__earnings">
-                  {EARNINGS.map((earning) => (
-                    <li key={earning.title}>
-                      <span>
-                        <strong>{earning.title}</strong>
-                        <small>{earning.meta}</small>
-                      </span>
-                      <span className="dashboard__coins">{earning.coins}</span>
-                      <span className="dashboard__confirmed">Confirmed</span>
-                    </li>
-                  ))}
-                </ul>
+                {completed.length === 0 ? (
+                  <p className="dashboard__note">No completed tests yet.</p>
+                ) : (
+                  <ul className="dashboard__results wallet__earnings">
+                    {completed.slice(0, 5).map((item) => (
+                      <li key={item.id}>
+                        <span>
+                          <strong>{item.skillName}</strong>
+                          <small>
+                            {item.subSkillName} · {formatDate(item.completedAt)}
+                          </small>
+                        </span>
+                        <span className="dashboard__confirmed">{formatLabel(item.coinAllocationStatus)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </section>
             </Col>
           </Row>

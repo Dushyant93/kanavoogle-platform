@@ -1,8 +1,8 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck, faChevronRight } from '@fortawesome/free-solid-svg-icons'
 import Form from 'react-bootstrap/Form'
-import { useSkillOptions } from '../../hooks/useAssessmentFlow'
+import { useSkill, useSkillOptions } from '../../hooks/useAssessmentFlow'
 import { assessmentFlowService } from '../../services/assessmentFlowService'
 import type { Complexity } from '../../types/assessment'
 import type { StartAssessmentRequest } from '../../types/assessmentFlow'
@@ -14,29 +14,32 @@ import { assessmentPaths } from './paths'
 const DIFFICULTY_OPTIONS: {
   value: Complexity
   label: string
-  reward: number
+  weight: number
   caption: string
   optimal?: boolean
 }[] = [
-  { value: 'FOUNDATION', label: 'Low', reward: 1, caption: 'Base Reward' },
-  { value: 'INTERMEDIATE', label: 'Medium', reward: 2, caption: 'Standard', optimal: true },
-  { value: 'ADVANCED', label: 'High', reward: 3, caption: 'Mastery' },
+  { value: 'FOUNDATION', label: 'Low', weight: 1, caption: 'Score weight' },
+  { value: 'INTERMEDIATE', label: 'Medium', weight: 1.25, caption: 'Score weight', optimal: true },
+  { value: 'ADVANCED', label: 'High', weight: 1.5, caption: 'Score weight' },
 ]
 
-const MIN_QUESTIONS = 5
-const MAX_QUESTIONS = 60
+const MIN_QUESTIONS = 3
+const MAX_QUESTIONS = 15
 
 function StartForm({ skills }: { skills: Skill[] }) {
   const [skillId, setSkillId] = useState(skills[0]?.id ?? '')
-  const [subSkillId, setSubSkillId] = useState(skills[0]?.subSkills.find((item) => item.active)?.id ?? '')
+  const [subSkillId, setSubSkillId] = useState('')
   const [complexity, setComplexity] = useState<Complexity>('INTERMEDIATE')
-  const [questionCount, setQuestionCount] = useState('45')
+  const [questionCount, setQuestionCount] = useState('8')
   const [submitted, setSubmitted] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  const skill = skills.find((item) => item.id === skillId)
+  const { data: skill, loading: skillLoading, error: skillError } = useSkill(skillId)
   const subSkills = skill?.subSkills.filter((item) => item.active) ?? []
+
+  useEffect(() => {
+    setSubSkillId(skill?.subSkills.find((item) => item.active)?.id ?? '')
+  }, [skill])
 
   const count = Number(questionCount)
   const countValid = Number.isInteger(count) && count >= MIN_QUESTIONS && count <= MAX_QUESTIONS
@@ -44,8 +47,7 @@ function StartForm({ skills }: { skills: Skill[] }) {
 
   function handleSkillChange(nextSkillId: string) {
     setSkillId(nextSkillId)
-    const next = skills.find((item) => item.id === nextSkillId)
-    setSubSkillId(next?.subSkills.find((item) => item.active)?.id ?? '')
+    setSubSkillId('')
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -85,10 +87,13 @@ function StartForm({ skills }: { skills: Skill[] }) {
             </option>
           ))}
         </Form.Select>
+        {skill?.description ? <Form.Text className="tests-hint">{skill.description}</Form.Text> : null}
       </Form.Group>
 
       <fieldset className="mb-4">
         <legend className="tests-label">Target Sub-skill</legend>
+        {skillLoading ? <div className="tests-hint">Loading sub-skills</div> : null}
+        {skillError ? <ErrorBlock message={skillError} /> : null}
         <div className="d-flex flex-wrap gap-2">
           {subSkills.map((item) => {
             const selected = item.id === subSkillId
@@ -128,9 +133,9 @@ function StartForm({ skills }: { skills: Skill[] }) {
                 {option.optimal ? <span className="tests-difficulty__badge">Optimal</span> : null}
                 <span className="tests-difficulty__name">{option.label}</span>
                 <span
-                  className={`tests-difficulty__reward${option.reward === 3 ? ' tests-difficulty__reward--gold' : ''}`}
+                  className={`tests-difficulty__reward${option.weight === 1.5 ? ' tests-difficulty__reward--gold' : ''}`}
                 >
-                  +{option.reward}
+                  {option.weight}
                 </span>
                 <span className="tests-difficulty__caption">{option.caption}</span>
               </button>
@@ -151,7 +156,7 @@ function StartForm({ skills }: { skills: Skill[] }) {
           isInvalid={submitted && !countValid}
           onChange={(event) => setQuestionCount(event.target.value)}
         />
-        <Form.Text className="tests-hint">Recommended: 30–50 questions</Form.Text>
+        <Form.Text className="tests-hint">Choose 3–15 questions</Form.Text>
         <Form.Control.Feedback type="invalid">
           Enter a number between {MIN_QUESTIONS} and {MAX_QUESTIONS}.
         </Form.Control.Feedback>

@@ -20,9 +20,26 @@ const GUEST_ITEMS = [
   { id: 'create-account', label: 'Create account', href: '/register' },
 ] as const
 
+type HeaderAccount = {
+  name: string
+  level: string
+}
+
 type HeaderProps = {
   user: User | null
   active?: StudentNavItem
+  account?: HeaderAccount
+}
+
+function AccountIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4 0-7 2-7 4.5V20h14v-1.5C19 16 16 14 12 14Z"
+      />
+    </svg>
+  )
 }
 
 function initials(name: string) {
@@ -34,7 +51,7 @@ function initials(name: string) {
     .join('')
 }
 
-export function Header({ user, active = 'home' }: HeaderProps) {
+export function Header({ user, active = 'home', account }: HeaderProps) {
   const [loggingOut, setLoggingOut] = useState(false)
   const isStudent = user?.role === 'STUDENT'
   if (user && !isStudent) return null
@@ -104,21 +121,34 @@ export function Header({ user, active = 'home' }: HeaderProps) {
               </div>
             </>
           ) : (
-            <Nav className="ms-lg-auto align-items-lg-center">
-              {GUEST_ITEMS.map((item) => (
-                <Nav.Link
-                  key={item.id}
-                  href={item.href}
-                  className={
-                    item.id === 'create-account'
-                      ? 'student-header__link student-header__signup'
-                      : 'student-header__link'
-                  }
-                >
-                  {item.label}
-                </Nav.Link>
-              ))}
-            </Nav>
+            <>
+              <Nav className={`${account ? '' : 'ms-lg-auto '}align-items-lg-center`}>
+                {GUEST_ITEMS.map((item) => (
+                  <Nav.Link
+                    key={item.id}
+                    href={item.href}
+                    className={
+                      item.id === 'create-account'
+                        ? 'student-header__link student-header__signup'
+                        : 'student-header__link'
+                    }
+                  >
+                    {item.label}
+                  </Nav.Link>
+                ))}
+              </Nav>
+              {account ? (
+                <div className="student-header__account ms-lg-auto">
+                  <div>
+                  <div className="student-header__name">{account.name}</div>
+                  {account.level ? <div className="student-header__level">{account.level}</div> : null}
+                  </div>
+                  <div className="student-header__avatar" aria-hidden="true">
+                    <AccountIcon />
+                  </div>
+                </div>
+              ) : null}
+            </>
           )}
         </Navbar.Collapse>
       </Container>

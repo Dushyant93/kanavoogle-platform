@@ -34,4 +34,9 @@ public class AssessmentController {
     public AssessmentService.Result submit(@PathVariable String id, @RequestBody AssessmentService.Submit r) {
         return s.submit(id, r);
     }
+
+    @GetMapping("/{id}/result")
+    public AssessmentService.Result result(@PathVariable String id) {
+        return s.result(id);
+    }
 }

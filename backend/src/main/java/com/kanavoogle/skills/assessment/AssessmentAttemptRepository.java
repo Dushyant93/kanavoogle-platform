@@ -8,4 +8,6 @@ public interface AssessmentAttemptRepository extends MongoRepository<AssessmentA
     List<AssessmentAttempt> findTop10ByStudentIdOrderByCreatedAtDesc(String studentId);
 
     List<AssessmentAttempt> findByStudentIdAndStatus(String studentId, String status);
+
+    List<AssessmentAttempt> findByStatus(String status);
 }

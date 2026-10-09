@@ -108,8 +108,14 @@ export function Profile() {
             <Col xs={6} xl={3}>
               <article className="dashboard__card">
                 <p className="dashboard__kicker">Rank and Percentile</p>
-                <div className="profile__stat-value">—</div>
-                <div className="dashboard__stat-label">Coming soon</div>
+                <div className="profile__stat-value">
+                  {dashboard?.standing ? dashboard.standing.place : '—'}
+                </div>
+                <div className="dashboard__stat-label">
+                  {dashboard?.standing
+                    ? `of ${dashboard.standing.total} · ${dashboard.standing.percentile}th percentile`
+                    : 'No completed tests yet'}
+                </div>
               </article>
             </Col>
           </Row>
@@ -119,7 +125,7 @@ export function Profile() {
               <section className="dashboard__card">
                 <div className="d-flex justify-content-between align-items-start gap-2 mb-1">
                   <h2 className="dashboard__card-title mb-0">Skill Holdings</h2>
-                  <a className="dashboard__link" href="/wallet">Manage Allocation</a>
+                  <a className="dashboard__link" href="/my-vault">Manage Allocation</a>
                 </div>
                 <p className="dashboard__note">Validated scholar credits allocated by core competence.</p>
                 {skills.length === 0 ? (

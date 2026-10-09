@@ -48,6 +48,12 @@ public class AuthController {
                               @NotBlank String contactPerson, @NotBlank String organisationRole) {
     }
 
+    public record ProfileUpdate(@NotBlank String displayName, @Email @NotBlank String email,
+                                @NotBlank String schoolName, @Size(max = 160) String bio, @Size(max = 120) String degree,
+                                @Size(max = 40) String cohort, @Size(max = 40) String expectedGraduation,
+                                boolean publicProfile, boolean skillSharingConsent, String photo) {
+    }
+
     @PostMapping("/register/student")
     public UserAccount student(@Valid @RequestBody StudentReg r, HttpServletResponse res) {
         UserAccount u = base(r.displayName(), r.email(), r.password(), Role.STUDENT, VerificationStatus.NOT_REQUIRED);
@@ -109,6 +115,44 @@ public class AuthController {
     @GetMapping("/me")
     public UserAccount me() {
         return safe(users.findById(SecurityUtils.current().userId()).orElseThrow());
+    }
+
+    @PutMapping("/me")
+    public UserAccount update(@Valid @RequestBody ProfileUpdate r) {
+        UserAccount u = users.findById(SecurityUtils.current().userId()).orElseThrow();
+        if (u.getRole() != Role.STUDENT) throw new SecurityException("Student role required");
+        String email = r.email().trim().toLowerCase(Locale.ROOT);
+        if (!email.equals(u.getEmail()) && users.existsByEmailIgnoreCase(email))
+            throw new IllegalArgumentException("Email already registered");
+        String photo = r.photo() == null ? null : r.photo().trim();
+        if (photo != null && !photo.isEmpty()) {
+            if (!photo.startsWith("data:image/") || photo.length() > 1_200_000)
+                throw new IllegalArgumentException("Photo must be a JPG, GIF, or PNG under 800K");
+        } else {
+            photo = null;
+        }
+        u.setDisplayName(r.displayName().trim());
+        u.setEmail(email);
+        UserAccount.StudentProfile p = u.getStudentProfile();
+        if (p == null) {
+            p = new UserAccount.StudentProfile();
+            u.setStudentProfile(p);
+        }
+        p.setSchoolName(r.schoolName().trim());
+        p.setBio(blankToNull(r.bio()));
+        p.setDegree(blankToNull(r.degree()));
+        p.setCohort(blankToNull(r.cohort()));
+        p.setExpectedGraduation(blankToNull(r.expectedGraduation()));
+        p.setPublicProfile(r.publicProfile());
+        p.setSkillSharingConsent(r.skillSharingConsent());
+        p.setPhoto(photo);
+        return safe(users.save(u));
+    }
+
+    private String blankToNull(String v) {
+        if (v == null) return null;
+        String x = v.trim();
+        return x.isEmpty() ? null : x;
     }
 
     private UserAccount base(String n, String e, String pass, Role role, VerificationStatus status) {

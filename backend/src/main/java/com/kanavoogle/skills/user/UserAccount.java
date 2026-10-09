@@ -103,8 +103,9 @@ public class UserAccount {
 
     public static class StudentProfile {
         private Integer age, yearLevel;
-        private String schoolName, region;
+        private String schoolName, region, bio, degree, cohort, expectedGraduation, photo;
         private boolean skillSharingConsent;
+        private boolean publicProfile;
 
         public Integer getAge() {
             return age;
@@ -144,6 +145,54 @@ public class UserAccount {
 
         public void setSkillSharingConsent(boolean v) {
             skillSharingConsent = v;
+        }
+
+        public String getBio() {
+            return bio;
+        }
+
+        public void setBio(String v) {
+            bio = v;
+        }
+
+        public String getDegree() {
+            return degree;
+        }
+
+        public void setDegree(String v) {
+            degree = v;
+        }
+
+        public String getCohort() {
+            return cohort;
+        }
+
+        public void setCohort(String v) {
+            cohort = v;
+        }
+
+        public String getExpectedGraduation() {
+            return expectedGraduation;
+        }
+
+        public void setExpectedGraduation(String v) {
+            expectedGraduation = v;
+        }
+
+        public String getPhoto() {
+            return photo;
+        }
+
+        public void setPhoto(String v) {
+            photo = v;
+        }
+
+        public boolean isPublicProfile() {
+            return publicProfile;
+        }
+
+        public void setPublicProfile(boolean v) {
+            publicProfile = v;
         }
     }
 
