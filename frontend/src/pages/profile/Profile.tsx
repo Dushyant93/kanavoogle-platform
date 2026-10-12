@@ -17,7 +17,9 @@ const student: User = {
     age: 15,
     yearLevel: 4,
     schoolName: 'Stanford Scholar',
-    region: 'Sydney',
+    postcode: '4018',
+    state: 'QLD',
+    suburb:'Taigum',
     skillSharingConsent: true,
   },
 }

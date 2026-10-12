@@ -1,8 +1,13 @@
+import type { AustralianState } from './location'
+
 export type StudentProfile = {
   age: number
   yearLevel: number
   schoolName: string
-  region: string
+  state: AustralianState
+  suburb: string
+  postcode: string
+  region?: string
   skillSharingConsent: boolean
 }
 
@@ -13,6 +18,8 @@ export type StudentRegistration = {
   age: number
   yearLevel: number
   schoolName: string
-  region: string
+  state: AustralianState
+  suburb: string
+  postcode: string
   skillSharingConsent: boolean
 }
