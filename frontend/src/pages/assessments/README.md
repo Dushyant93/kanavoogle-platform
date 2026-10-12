@@ -1,13 +1,18 @@
 # Assessment screens (Arjun)
 
-Four student screens: Assessment List, Start Assessment, Questions and Result.
+Five student screens: My Tests, Start Test, Questions, Test Complete and Test Report.
+
+After **Submit**, the student sees **Test Complete**: a positive remark and how many they got right, then **View Report** for the full report. There are no letter grades. Below 30% (`LOW_SCORE_PERCENT` in `assessmentFormat.ts`) the score is hidden and only encouragement is shown.
+
+The number of questions comes from the student's age at registration, not from the Start Test screen: 13–14 → 10, 15–16 → 15, 17–19 → 20. Change `QUESTIONS_BY_AGE` in `assessmentFormat.ts` to adjust. The backend currently allows at most 15.
 
 | Screen | URL | File |
 |---|---|---|
-| Assessment List | `/tests` | `AssessmentList.tsx` |
-| Start Assessment | `/tests/new` | `AssessmentConfig.tsx` |
+| My Tests | `/tests` | `AssessmentList.tsx` |
+| Start Test | `/tests/new` | `AssessmentConfig.tsx` |
 | Questions | `/tests/take?id=<id>` | `AssessmentQuestions.tsx` |
-| Result | `/tests/result?id=<id>` | `AssessmentResult.tsx` |
+| Test Complete | `/tests/complete?id=<id>` | `AssessmentComplete.tsx` |
+| Test Report | `/tests/result?id=<id>` | `AssessmentResult.tsx` |
 
 ## Merging with the other screens
 
@@ -108,4 +113,4 @@ If `grade` is missing, the screen uses placeholder bands (A+ ≥ 95, A ≥ 85, a
 
 The mock competency grouping (two questions per competency, 10 points each) is only a placeholder. The real mapping of questions to competencies and points should come from the backend.
 
-"Back to Vault" links to `/my-vault`, which is the wallet screen someone else is building.
+"Back to Vault" links to `/my-vault`, the My Vault screen someone else is building.

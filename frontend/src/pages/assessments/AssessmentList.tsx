@@ -16,7 +16,7 @@ import { useAssessmentList } from '../../hooks/useAssessmentFlow'
 import type { AssessmentListItem } from '../../types/assessmentFlow'
 import { formatLabel } from '../../utils/format'
 import { AssessmentLayout, ErrorBlock, LoadingBlock } from './AssessmentLayout'
-import { formatDateTime, isConfirmed, questionCountOf, scoreOf } from './assessmentFormat'
+import { formatDateTime, isConfirmed, isLowScore, questionCountOf, scoreOf } from './assessmentFormat'
 import { assessmentPaths } from './paths'
 
 type StatusFilter = 'ALL' | 'CONFIRMED' | 'PENDING'
@@ -59,7 +59,9 @@ function AssessmentCard({ assessment }: { assessment: AssessmentListItem }) {
       <div className="tests-list__side">
         <div className="d-flex align-items-center gap-2">
           <span className="tests-chip">{questionCountOf(assessment)} Questions</span>
-          {score != null ? (
+          {score != null && isLowScore(score) ? (
+            <span className="tests-chip tests-chip--success tests-chip--plain">Keep practising</span>
+          ) : score != null ? (
             <span className="tests-list__score">
               {score}/100 <small>({score}%)</small>
             </span>
@@ -68,12 +70,12 @@ function AssessmentCard({ assessment }: { assessment: AssessmentListItem }) {
           )}
         </div>
         <div className="d-flex align-items-center gap-2">
-          {assessment.coinsAwarded != null ? (
+          {assessment.coinsAwarded === 0 ? null : assessment.coinsAwarded != null ? (
             <span className="tests-coins">
-              <FontAwesomeIcon icon={faCoins} /> +{assessment.coinsAwarded} Coins
+              <FontAwesomeIcon icon={faCoins} /> +{assessment.coinsAwarded} Skill Coins
             </span>
           ) : (
-            <span className="tests-chip">Coins {formatLabel(assessment.coinAllocationStatus)}</span>
+            <span className="tests-chip">Skill Coins {formatLabel(assessment.coinAllocationStatus)}</span>
           )}
           {confirmed ? (
             <a className="tests-btn tests-btn--outline tests-btn--sm" href={assessmentPaths.result(assessment.id)}>
@@ -137,9 +139,9 @@ export function AssessmentList() {
     <AssessmentLayout>
       <div className="tests-page-head">
         <div>
-          <h1 className="tests-title">Test Lists</h1>
+          <h1 className="tests-title">My Tests</h1>
           <p className="tests-subtitle">
-            Review your completed tests, verified test scores, and minted Skill-Coins.
+            Your tests, scores and Skill Coins in one place.
           </p>
         </div>
         <a className="tests-btn tests-btn--primary" href={assessmentPaths.start}>
@@ -157,7 +159,7 @@ export function AssessmentList() {
               <FontAwesomeIcon icon={faMagnifyingGlass} className="tests-search__icon" aria-hidden="true" />
               <Form.Control
                 type="search"
-                placeholder="Search by skill, title, or exam keyword..."
+                placeholder="Search by skill, sub-skill or test name..."
                 aria-label="Search tests"
                 value={search}
                 onChange={(event) => {

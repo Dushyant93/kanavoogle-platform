@@ -44,7 +44,7 @@ export type CredentialProof = {
 /** What the Result screen shows. Returned by submit and by GET /assessments/:id/result. */
 export type AssessmentReport = AssessmentResult & {
   studentName?: string
-  /** The student's wallet ID shown under their name, e.g. "SC-882194". */
+  /** The student's Vault ID shown under their name, e.g. "SC-882194". */
   studentId?: string
   grade?: string
   coinsEarned?: number | null
