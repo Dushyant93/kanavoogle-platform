@@ -105,6 +105,9 @@ public class UserAccount {
         private Integer age, yearLevel;
         private String schoolName, region;
         private boolean skillSharingConsent;
+        private String state;
+        private String suburb;
+        private String postcode;
 
         public Integer getAge() {
             return age;
@@ -145,10 +148,37 @@ public class UserAccount {
         public void setSkillSharingConsent(boolean v) {
             skillSharingConsent = v;
         }
+
+        public String getState() {
+            return state;
+        }
+
+        public void setState(String state) {
+            this.state = state;
+        }
+
+        public String getSuburb() {
+            return suburb;
+        }
+
+        public void setSuburb(String suburb) {
+            this.suburb = suburb;
+        }
+
+        public String getPostcode() {
+            return postcode;
+        }
+
+        public void setPostcode(String postcode) {
+            this.postcode = postcode;
+        }
     }
 
     public static class SchoolProfile {
         private String schoolName, location, contactPerson, officialEmail;
+        private String state;
+        private String suburb;
+        private String postcode;
 
         public String getSchoolName() {
             return schoolName;
@@ -180,6 +210,30 @@ public class UserAccount {
 
         public void setOfficialEmail(String v) {
             officialEmail = v;
+        }
+
+        public String getState() {
+            return state;
+        }
+
+        public void setState(String state) {
+            this.state = state;
+        }
+
+        public String getSuburb() {
+            return suburb;
+        }
+
+        public void setSuburb(String suburb) {
+            this.suburb = suburb;
+        }
+
+        public String getPostcode() {
+            return postcode;
+        }
+
+        public void setPostcode(String postcode) {
+            this.postcode = postcode;
         }
     }
 

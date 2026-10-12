@@ -1,6 +1,7 @@
 package com.kanavoogle.skills.auth;
 
 import com.kanavoogle.skills.config.AppProperties;
+import com.kanavoogle.skills.repository.LocationRepository;
 import com.kanavoogle.skills.security.*;
 import com.kanavoogle.skills.user.*;
 import jakarta.servlet.http.HttpServletResponse;
@@ -10,6 +11,7 @@ import jakarta.validation.constraints.*;
 import java.time.*;
 import java.util.Locale;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,25 +19,22 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
     private final UserRepository users;
     private final PasswordEncoder encoder;
     private final JwtService jwt;
     private final AppProperties props;
-
-    public AuthController(UserRepository u, PasswordEncoder e, JwtService j, AppProperties p) {
-        users = u;
-        encoder = e;
-        jwt = j;
-        props = p;
-    }
+    private final LocationRepository locations;
 
     public record Login(@Email @NotBlank String email, @NotBlank String password) {
     }
 
     public record StudentReg(@NotBlank String displayName, @Email @NotBlank String email,
                              @Size(min = 10) String password, @Min(13) @Max(19) int age, @Min(7) @Max(12) int yearLevel,
-                             @NotBlank String schoolName, @NotBlank String region, boolean skillSharingConsent) {
+                             @NotBlank String schoolName, @NotBlank String region, @NotBlank String state,
+                             @NotBlank String suburb, @Pattern(regexp = "\\d{4}") String postcode,
+                             boolean skillSharingConsent) {
     }
 
     public record SchoolReg(@NotBlank String displayName, @Email @NotBlank String email,
@@ -50,12 +49,20 @@ public class AuthController {
 
     @PostMapping("/register/student")
     public UserAccount student(@Valid @RequestBody StudentReg r, HttpServletResponse res) {
+        validateLocation(
+                r.state(),
+                r.suburb(),
+                r.postcode()
+        );
         UserAccount u = base(r.displayName(), r.email(), r.password(), Role.STUDENT, VerificationStatus.NOT_REQUIRED);
         UserAccount.StudentProfile p = new UserAccount.StudentProfile();
         p.setAge(r.age());
         p.setYearLevel(r.yearLevel());
         p.setSchoolName(r.schoolName());
-        p.setRegion(r.region());
+        //p.setRegion(r.region());
+        p.setState(r.state().trim().toUpperCase(Locale.ROOT));
+        p.setSuburb(r.suburb().trim());
+        p.setPostcode(r.postcode().trim());
         p.setSkillSharingConsent(r.skillSharingConsent());
         u.setStudentProfile(p);
         u = users.save(u);
@@ -130,5 +137,25 @@ public class AuthController {
     private UserAccount safe(UserAccount u) {
         u.setPasswordHash(null);
         return u;
+    }
+
+    private void validateLocation(
+            String state,
+            String suburb,
+            String postcode) {
+
+        String normalizedState = state.trim().toUpperCase(Locale.ROOT);
+
+        boolean valid = locations.existsByStateAndSuburbIgnoreCaseAndPostcode(
+                                normalizedState,
+                                suburb.trim(),
+                                postcode.trim()
+                        );
+
+        if (!valid) {
+            throw new IllegalArgumentException(
+                    "Please select a valid suburb and postcode from the location search"
+            );
+        }
     }
 }

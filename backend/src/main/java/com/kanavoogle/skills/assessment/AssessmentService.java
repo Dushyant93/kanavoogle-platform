@@ -121,6 +121,37 @@ public class AssessmentService {
         return new Result(view(a), correct, a.getQuestions().size());
     }
 
+    public Result result(String id) {
+
+        AssessmentAttempt a = owned(id);
+
+        if (!"COMPLETED".equals(a.getStatus())) {
+            throw new IllegalStateException(
+                    "Assessment has not been completed"
+            );
+        }
+
+        int correct = 0;
+
+        for (var q : a.getQuestions()) {
+
+            String response =
+                    a.getResponses().get(q.getQuestionId());
+
+            if (response != null &&
+                    q.getCorrectAnswer().equalsIgnoreCase(response.trim())) {
+
+                correct++;
+            }
+        }
+
+        return new Result(
+                view(a),
+                correct,
+                a.getQuestions().size()
+        );
+    }
+
     private UserAccount student() {
         UserAccount u = users.findById(SecurityUtils.current().userId()).orElseThrow();
         if (u.getRole() != Role.STUDENT) throw new SecurityException("Student role required");
