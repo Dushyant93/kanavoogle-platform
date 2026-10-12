@@ -13,7 +13,7 @@ export function AssessmentResultView({ assessmentId }: AssessmentResultViewProps
   const { result } = useResults(assessmentId)
 
   if (!result) {
-    return <Alert variant="secondary">Return to your dashboard to view the recorded assessment.</Alert>
+    return <Alert variant="secondary">Return to your dashboard to view the recorded test.</Alert>
   }
 
   const { assessment } = result

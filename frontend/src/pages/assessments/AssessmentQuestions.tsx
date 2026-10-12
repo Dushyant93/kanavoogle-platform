@@ -70,7 +70,7 @@ function QuestionRunner({ assessment }: { assessment: Assessment }) {
           </strong>
           <span className="tests-chip tests-chip--success">{progress}% Completed</span>
         </div>
-        <ProgressBar now={progress} className="tests-progress__bar" aria-label="Assessment progress" />
+        <ProgressBar now={progress} className="tests-progress__bar" aria-label="Test progress" />
       </section>
 
       <section className="tests-card tests-question" aria-labelledby="question-prompt">
@@ -120,7 +120,7 @@ function QuestionRunner({ assessment }: { assessment: Assessment }) {
             disabled={!selected || submitting}
             onClick={handleSubmit}
           >
-            {submitting ? 'Submitting...' : 'Submit Assessment'} <FontAwesomeIcon icon={faCheck} />
+            {submitting ? 'Submitting...' : 'Submit Test'} <FontAwesomeIcon icon={faCheck} />
           </button>
         ) : (
           <button
@@ -143,16 +143,16 @@ export function AssessmentQuestions() {
 
   return (
     <AssessmentLayout narrow>
-      {!id ? <ErrorBlock message="No assessment selected. Start a test from the Tests page." /> : null}
+      {!id ? <ErrorBlock message="No test selected. Start a test from the Tests page." /> : null}
       {id && loading ? <LoadingBlock label="Loading questions" /> : null}
       {id && error ? <ErrorBlock message={error} /> : null}
       {data && data.completedAt ? (
         <div className="tests-empty">
-          You’ve already finished this assessment. <a href={assessmentPaths.result(data.id)}>View your result</a>.
+          You’ve already finished this test. <a href={assessmentPaths.result(data.id)}>View your result</a>.
         </div>
       ) : null}
       {data && !data.completedAt && data.questions.length === 0 ? (
-        <div className="tests-empty">This assessment has no questions yet.</div>
+        <div className="tests-empty">This test has no questions yet.</div>
       ) : null}
       {data && !data.completedAt && data.questions.length > 0 ? <QuestionRunner assessment={data} /> : null}
     </AssessmentLayout>

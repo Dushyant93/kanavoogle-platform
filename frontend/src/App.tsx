@@ -13,7 +13,7 @@ import { Profile as EditProfile } from './pages/student/Profile'
 const COMING_SOON_PAGES: Record<string, { title: string; signedIn: boolean }> = {
   '/forgot-password': { title: 'Password reset', signedIn: false },
   '/profile/share': { title: 'Share profile', signedIn: true },
-  '/wallet/export': { title: 'Export ledger', signedIn: true },
+  '/my-vault/export': { title: 'Export ledger', signedIn: true },
   '/privacy': { title: 'Privacy policy', signedIn: false },
   '/terms': { title: 'Terms of accreditation', signedIn: false },
   '/audit-ledger': { title: 'Audit ledger', signedIn: false },
@@ -24,7 +24,7 @@ export default function App() {
   if (path === '/login') return <Login />
   if (path === '/register') return <Register />
   if (path === '/student') return <Dashboard />
-  if (path === '/wallet') return <SkillsWallet />
+  if (path === '/my-vault') return <SkillsWallet />
   if (path === '/profile/edit') return <EditProfile />
   if (path === '/profile') return <Profile />
   const AssessmentPage = assessmentRoutes[path]

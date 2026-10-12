@@ -16,7 +16,7 @@ const JOURNEY = [
 const ROLES = [
   {
     title: 'Students',
-    text: 'Complete age-appropriate assessments and build a persistent skill profile.',
+    text: 'Complete age-appropriate tests and build a persistent skill profile.',
     icon: 'student',
   },
   {
@@ -78,7 +78,7 @@ export function Home() {
               </h1>
               <p className="home__lead">
                 A structured platform for students, schools and employers, extending digital
-                assessment with controlled AI, explainable scoring and trusted verification.
+                tests with controlled AI, explainable scoring and trusted verification.
               </p>
               <div className="home__actions">
                 <a className="home__primary" href="/register">
@@ -105,7 +105,7 @@ export function Home() {
                 </Col>
               </Row>
               <section className="home__journey" aria-labelledby="assessment-journey">
-                <h2 id="assessment-journey">Assessment journey</h2>
+                <h2 id="assessment-journey">Test journey</h2>
                 <ol>
                   {JOURNEY.map((step) => (
                     <li key={step}>{step}</li>

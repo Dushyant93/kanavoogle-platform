@@ -3,6 +3,6 @@ import { request } from './http'
 
 export const walletService = {
   mine() {
-    return request<Wallet>('/wallet/me')
+    return request<Wallet>('/my-vault/me')
   },
 }
