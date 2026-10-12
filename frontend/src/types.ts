@@ -38,3 +38,42 @@ export type Assessment = {
     createdAt: string,
     completedAt?: string
 };
+export type Complexity = 'FOUNDATION' | 'INTERMEDIATE' | 'ADVANCED';
+export type WalletAttempt = {
+    id: string,
+    subSkillName: string,
+    context: string,
+    complexity: Complexity,
+    rawPercent?: number,
+    weightedPercent?: number,
+    completedAt?: string
+};
+export type WalletSkill = {
+    skillId: string,
+    skillName: string,
+    evidenceScore: number,
+    completedAssessments: number,
+    coinAllocationStatus: string,
+    proofType: string,
+    proofValue: string,
+    ledgerVerified: boolean,
+    bestScore: number,
+    latestScore: number,
+    firstAssessedAt?: string,
+    lastAssessedAt?: string,
+    complexitiesAttempted: Complexity[],
+    subSkills: { subSkillId: string, subSkillName: string, completedAssessments: number, averageScore: number }[],
+    attempts: WalletAttempt[]
+};
+export type Wallet = {
+    student: { displayName: string, yearLevel?: number, schoolName?: string, skillSharingConsent: boolean },
+    summary: {
+        skillsEvidenced: number,
+        completedAssessments: number,
+        averageEvidenceScore: number,
+        ledgerVerifiedSkills: number,
+        lastActivityAt?: string,
+        coinAllocationStatus: string
+    },
+    skills: WalletSkill[]
+};

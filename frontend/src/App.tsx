@@ -11,6 +11,7 @@ import AssessmentRunPage from './pages/AssessmentRunPage';
 import AssessmentResultPage from './pages/AssessmentResultPage';
 import SchoolDashboard from './pages/SchoolDashboard';
 import EmployerDashboard from './pages/EmployerDashboard';
+import WalletPage from './pages/WalletPage';
 
 export default function App() {
     const {user} = useAuth();
@@ -22,7 +23,7 @@ export default function App() {
                                                                                                       to={home}/> :
                                                                                                   <RegisterPage/>}/><Route
         element={<AppShell/>}><Route path="/student" element={<ProtectedRoute
-        roles={['STUDENT']}><StudentDashboard/></ProtectedRoute>}/><Route path="/student/assessment/new"
+        roles={['STUDENT']}><StudentDashboard/></ProtectedRoute>}/><Route path="/student/wallet" element={<ProtectedRoute roles={['STUDENT']}><WalletPage/></ProtectedRoute>}/><Route path="/student/assessment/new"
                                                                           element={<ProtectedRoute
                                                                               roles={['STUDENT']}><AssessmentSetupPage/></ProtectedRoute>}/><Route
         path="/student/assessment/:id"

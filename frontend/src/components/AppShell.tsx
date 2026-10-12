@@ -9,7 +9,7 @@ export default function AppShell() {
         <header className="topbar"><Link to="/" className="brand"><span className="brand-mark"><ShieldCheck size={18}/></span>Kanavoogle
             Skills</Link>
             <nav>{user?.role === 'STUDENT' && <><Link to="/student">Dashboard</Link><Link
-                to="/student/assessment/new">Assessment</Link></>}{user?.role === 'SCHOOL' &&
+                to="/student/assessment/new">Assessment</Link><Link to="/student/wallet">Wallet</Link></>}{user?.role === 'SCHOOL' &&
                 <Link to="/school">School</Link>}{user?.role === 'EMPLOYER' && <Link to="/employer">Employer</Link>}
                 <button className="text-button" onClick={async () => {
                     await logout();
