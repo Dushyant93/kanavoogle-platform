@@ -1,8 +1,3 @@
-// API calls for the assessment screens. Pages never call fetch directly; they go
-// page -> hook (useAssessmentFlow) -> this service -> http.ts, same as the rest of the app.
-//
-// While the backend isn't ready, local dev uses mock data. Set VITE_USE_MOCKS=false
-// (e.g. in .env.local) to hit the real API. Production builds never use mocks.
 import type { Assessment } from '../types/assessment'
 import type {
   AssessmentListItem,
@@ -19,16 +14,27 @@ import { skillsService } from './skillsService'
 
 export const USE_ASSESSMENT_MOCKS = import.meta.env.DEV && import.meta.env.VITE_USE_MOCKS !== 'false'
 
+function isMissingEndpoint(error: unknown) {
+  return error instanceof ApiError && [403, 404, 405].includes(error.status)
+}
+
+function reportFromAssessment(assessment: Assessment): AssessmentReport {
+  const total = assessment.questions.length
+  const percent = assessment.rawPercent ?? assessment.weightedPercent ?? 0
+  return {
+    assessment,
+    totalQuestions: total,
+    correctAnswers: Math.round((percent / 100) * total),
+  }
+}
+
 export const assessmentFlowService = {
-  /** GET /assessments — the signed-in student's assessments, newest first. */
   list(): Promise<AssessmentListItem[]> {
-    if (USE_ASSESSMENT_MOCKS) return assessmentMocks.list()
-    return request<AssessmentListItem[]>('/assessments')
+    return assessmentService.recent()
   },
 
   /** GET /skills — reuses the shared skills service. */
   skills(): Promise<Skill[]> {
-    if (USE_ASSESSMENT_MOCKS) return assessmentMocks.skills()
     return skillsService.list()
   },
 
@@ -56,15 +62,21 @@ export const assessmentFlowService = {
     return report
   },
 
-  /** GET /assessments/:id/result — falls back to the result cached at submit time. */
+  /**
+   * GET /assessments/:id/result. If the backend doesn't have it yet, uses the result
+   * saved at submit time, or builds a basic report from GET /assessments/:id.
+   */
   async report(id: string): Promise<AssessmentReport> {
     if (USE_ASSESSMENT_MOCKS) return assessmentMocks.report(id)
     try {
       return await request<AssessmentReport>(`/assessments/${encodeURIComponent(id)}/result`)
     } catch (error) {
+      if (!isMissingEndpoint(error)) throw error
       const cached = readResult(id)
-      if (cached && error instanceof ApiError && error.status === 404) return cached
-      throw error
+      if (cached) return cached
+      const assessment = await assessmentService.get(id)
+      if (!assessment.completedAt) throw new ApiError('This test isn’t finished yet.', 400)
+      return reportFromAssessment(assessment)
     }
   },
 }

@@ -22,4 +22,10 @@ export type StudentRegistration = {
   suburb: string
   postcode: string
   skillSharingConsent: boolean
+  bio?: string | null
+  degree?: string | null
+  cohort?: string | null
+  expectedGraduation?: string | null
+  publicProfile?: boolean
+  photo?: string | null
 }

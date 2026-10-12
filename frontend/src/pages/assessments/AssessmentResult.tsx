@@ -14,9 +14,8 @@ import ProgressBar from 'react-bootstrap/ProgressBar'
 import Row from 'react-bootstrap/Row'
 import { useAssessmentReport, useCurrentStudent } from '../../hooks/useAssessmentFlow'
 import type { AssessmentReport } from '../../types/assessmentFlow'
-import { formatLabel } from '../../utils/format'
 import { AssessmentLayout, ErrorBlock, LoadingBlock } from './AssessmentLayout'
-import { formatDuration, formatShortDate, isLowScore, percentFor, remarkFor } from './assessmentFormat'
+import { coinStatusLabel, formatDuration, formatShortDate, isLowScore, percentFor, remarkFor } from './assessmentFormat'
 import { assessmentPaths, idFromUrl } from './paths'
 
 function timeTaken(report: AssessmentReport) {
@@ -82,7 +81,7 @@ function ReportCard({ report, studentName }: { report: AssessmentReport; student
             {seconds != null ? <span className="tests-coins__time">• {formatDuration(seconds)}</span> : null}
           </span>
         ) : (
-          <span className="tests-chip">Skill Coins {formatLabel(assessment.coinAllocationStatus)}</span>
+          <span className="tests-chip">{coinStatusLabel(assessment.coinAllocationStatus)}</span>
         )}
       </div>
 

@@ -1,16 +1,25 @@
 import { useEffect, useRef, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowLeft, faArrowRight, faCheck, faCircle } from '@fortawesome/free-solid-svg-icons'
+import Form from 'react-bootstrap/Form'
 import ProgressBar from 'react-bootstrap/ProgressBar'
 import { useAssessmentToTake } from '../../hooks/useAssessmentFlow'
 import { assessmentFlowService } from '../../services/assessmentFlowService'
-import type { Assessment } from '../../types/assessment'
+import type { Assessment, AssessmentQuestion } from '../../types/assessment'
 import type { SubmitAnswersRequest } from '../../types/assessmentFlow'
 import { toErrorMessage } from '../../utils/errors'
 import { AssessmentLayout, ErrorBlock, LoadingBlock } from './AssessmentLayout'
 import { assessmentPaths, idFromUrl } from './paths'
 
 const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F']
+
+// Most questions are multiple choice. AI-made questions can also be True/False
+// (sometimes sent without options) or a short typed answer.
+function choicesFor(question: AssessmentQuestion) {
+  if (question.options.length > 0) return question.options
+  if (question.type === 'TRUE_FALSE') return ['True', 'False']
+  return []
+}
 
 function QuestionRunner({ assessment }: { assessment: Assessment }) {
   const questions = assessment.questions
@@ -27,7 +36,13 @@ function QuestionRunner({ assessment }: { assessment: Assessment }) {
   const total = questions.length
   const isLast = index === total - 1
   const progress = Math.round(((index + 1) / total) * 1000) / 10
+  const choices = choicesFor(question)
   const selected = responses[question.questionId]
+  const answered = Boolean(selected?.trim())
+
+  function setAnswer(value: string) {
+    setResponses((current) => ({ ...current, [question.questionId]: value }))
+  }
 
   useEffect(() => {
     shownAt.current = Date.now()
@@ -47,7 +62,8 @@ function QuestionRunner({ assessment }: { assessment: Assessment }) {
     recordTime()
     setSubmitting(true)
     setError(null)
-    const body: SubmitAnswersRequest = { responses, timeSpentMs: timeSpent.current }
+    const trimmed = Object.fromEntries(Object.entries(responses).map(([id, value]) => [id, value.trim()]))
+    const body: SubmitAnswersRequest = { responses: trimmed, timeSpentMs: timeSpent.current }
     try {
       await assessmentFlowService.submit(assessment.id, body)
       window.location.assign(assessmentPaths.complete(assessment.id))
@@ -77,29 +93,41 @@ function QuestionRunner({ assessment }: { assessment: Assessment }) {
         <h2 id="question-prompt" className="tests-question__prompt">
           {question.prompt}
         </h2>
-        <div className="tests-options" role="radiogroup" aria-labelledby="question-prompt">
-          {question.options.map((option, optionIndex) => {
-            const isSelected = selected === option
-            return (
-              <button
-                key={option}
-                type="button"
-                role="radio"
-                aria-checked={isSelected}
-                className={`tests-option${isSelected ? ' is-selected' : ''}`}
-                onClick={() => setResponses((current) => ({ ...current, [question.questionId]: option }))}
-              >
-                <span className="tests-option__letter">{OPTION_LETTERS[optionIndex]}</span>
-                <span className="tests-option__text">{option}</span>
-                {isSelected ? (
-                  <span className="tests-option__check" aria-hidden="true">
-                    <FontAwesomeIcon icon={faCheck} />
-                  </span>
-                ) : null}
-              </button>
-            )
-          })}
-        </div>
+        {choices.length === 0 ? (
+          <Form.Control
+            as="textarea"
+            rows={3}
+            maxLength={300}
+            value={selected ?? ''}
+            onChange={(event) => setAnswer(event.target.value)}
+            placeholder="Type your answer"
+            aria-labelledby="question-prompt"
+          />
+        ) : (
+          <div className="tests-options" role="radiogroup" aria-labelledby="question-prompt">
+            {choices.map((option, optionIndex) => {
+              const isSelected = selected === option
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  className={`tests-option${isSelected ? ' is-selected' : ''}`}
+                  onClick={() => setAnswer(option)}
+                >
+                  <span className="tests-option__letter">{OPTION_LETTERS[optionIndex]}</span>
+                  <span className="tests-option__text">{option}</span>
+                  {isSelected ? (
+                    <span className="tests-option__check" aria-hidden="true">
+                      <FontAwesomeIcon icon={faCheck} />
+                    </span>
+                  ) : null}
+                </button>
+              )
+            })}
+          </div>
+        )}
       </section>
 
       {error ? <ErrorBlock message={error} /> : null}
@@ -117,20 +145,20 @@ function QuestionRunner({ assessment }: { assessment: Assessment }) {
           <button
             type="button"
             className="tests-btn tests-btn--primary"
-            disabled={!selected || submitting}
+            disabled={!answered || submitting}
             onClick={handleSubmit}
           >
             {submitting ? 'Submitting...' : 'Submit Test'} <FontAwesomeIcon icon={faCheck} />
           </button>
         ) : (
-          <button
-            type="button"
-            className="tests-btn tests-btn--primary"
-            disabled={!selected}
-            onClick={() => goTo(index + 1)}
-          >
-            Next question <FontAwesomeIcon icon={faArrowRight} />
-          </button>
+            <button
+              type="button"
+              className="tests-btn tests-btn--primary"
+              disabled={!answered}
+              onClick={() => goTo(index + 1)}
+            >
+              Next question <FontAwesomeIcon icon={faArrowRight} />
+            </button>
         )}
       </nav>
     </>

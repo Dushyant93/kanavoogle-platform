@@ -2,7 +2,7 @@
 // pages only deal with display, never with fetch or mock details.
 import { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../auth/AuthContext'
-import { assessmentFlowService, USE_ASSESSMENT_MOCKS } from '../services/assessmentFlowService'
+import { assessmentFlowService } from '../services/assessmentFlowService'
 import type { Assessment } from '../types/assessment'
 import type { AssessmentListItem, AssessmentReport } from '../types/assessmentFlow'
 import type { User } from '../types/auth'
@@ -61,22 +61,10 @@ export function useAssessmentReport(id: string) {
   return useLoad<AssessmentReport>(() => assessmentFlowService.report(id), id ? `report:${id}` : '')
 }
 
-const MOCK_STUDENT: User = {
-  id: 'student-1',
-  email: 'alex.morgan@example.com',
-  displayName: 'Alex Morgan',
-  role: 'STUDENT',
-  verificationStatus: 'NOT_REQUIRED',
-  studentProfile: {
-    age: 15,
-    yearLevel: 4,
-    schoolName: 'Kanavoogle',
-    postcode: '4018',
-    state: 'QLD',
-    suburb:'Taigum',
-    skillSharingConsent: true,
-  },
+export function useSkill(id: string) {
+  return useLoad<Skill>(() => assessmentFlowService.skill(id), id ? `skill:${id}` : '')
 }
+
 
 /**
  * The signed-in student for the header. Uses the shared AuthProvider when the app
@@ -85,5 +73,5 @@ const MOCK_STUDENT: User = {
 export function useCurrentStudent(): User | null {
   const auth = useContext(AuthContext)
   if (auth?.user) return auth.user
-  return USE_ASSESSMENT_MOCKS ? MOCK_STUDENT : null
+  return auth?.user ?? null
 }

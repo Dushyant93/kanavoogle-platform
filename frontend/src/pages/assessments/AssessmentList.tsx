@@ -14,9 +14,8 @@ import {
 import Form from 'react-bootstrap/Form'
 import { useAssessmentList } from '../../hooks/useAssessmentFlow'
 import type { AssessmentListItem } from '../../types/assessmentFlow'
-import { formatLabel } from '../../utils/format'
 import { AssessmentLayout, ErrorBlock, LoadingBlock } from './AssessmentLayout'
-import { formatDateTime, isConfirmed, isLowScore, questionCountOf, scoreOf } from './assessmentFormat'
+import { coinStatusLabel, formatDateTime, isConfirmed, isLowScore, questionCountOf, scoreOf } from './assessmentFormat'
 import { assessmentPaths } from './paths'
 
 type StatusFilter = 'ALL' | 'CONFIRMED' | 'PENDING'
@@ -75,7 +74,7 @@ function AssessmentCard({ assessment }: { assessment: AssessmentListItem }) {
               <FontAwesomeIcon icon={faCoins} /> +{assessment.coinsAwarded} Skill Coins
             </span>
           ) : (
-            <span className="tests-chip">Skill Coins {formatLabel(assessment.coinAllocationStatus)}</span>
+            <span className="tests-chip">{coinStatusLabel(assessment.coinAllocationStatus)}</span>
           )}
           {confirmed ? (
             <a className="tests-btn tests-btn--outline tests-btn--sm" href={assessmentPaths.result(assessment.id)}>
