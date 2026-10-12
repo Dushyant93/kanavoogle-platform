@@ -1,0 +1,99 @@
+:root {
+  --color-surface: #fff;
+  --color-border: #e4e7e6;
+  --color-text: #4b5563;
+  --color-text-strong: #1a2744;
+  --color-brand: #1a2744;
+  --color-link: #1a2744;
+  --color-accent: #1a6b48;
+  --color-accent-soft: #eef1ef;
+  --color-muted: #6b7280;
+
+  --text: var(--color-text);
+  --text-h: var(--color-text-strong);
+  --bg: var(--color-accent-soft);
+  --border: var(--color-border);
+  --code-bg: var(--color-accent-soft);
+  --accent: var(--color-accent);
+  --accent-bg: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  --accent-border: color-mix(in srgb, var(--color-accent) 45%, transparent);
+  --social-bg: var(--color-surface);
+  --shadow: 0 10px 15px -3px color-mix(in srgb, var(--color-brand) 10%, transparent);
+
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 18px/145% var(--sans);
+  letter-spacing: 0.18px;
+  color-scheme: light;
+  color: var(--color-text);
+  background: var(--color-accent-soft);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+}
+
+#root {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+h1,
+h2 {
+  font-family: var(--heading);
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+h1 {
+  font-size: 56px;
+  letter-spacing: -1.68px;
+  margin: 32px 0;
+  @media (max-width: 1024px) {
+    font-size: 36px;
+    margin: 20px 0;
+  }
+}
+h2 {
+  font-size: 24px;
+  line-height: 118%;
+  letter-spacing: -0.24px;
+  margin: 0 0 8px;
+  @media (max-width: 1024px) {
+    font-size: 20px;
+  }
+}
+p {
+  margin: 0;
+}
+
+code,
+.counter {
+  font-family: var(--mono);
+  display: inline-flex;
+  border-radius: 4px;
+  color: var(--text-h);
+}
+
+code {
+  font-size: 15px;
+  line-height: 135%;
+  padding: 4px 8px;
+  background: var(--code-bg);
+}
