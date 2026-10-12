@@ -15,4 +15,10 @@ export type StudentRegistration = {
   schoolName: string
   region: string
   skillSharingConsent: boolean
+  bio?: string | null
+  degree?: string | null
+  cohort?: string | null
+  expectedGraduation?: string | null
+  publicProfile?: boolean
+  photo?: string | null
 }
