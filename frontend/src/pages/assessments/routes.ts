@@ -2,6 +2,7 @@
 //   const AssessmentPage = assessmentRoutes[path]
 //   if (AssessmentPage) return <AssessmentPage />
 import type { ComponentType } from 'react'
+import { AssessmentComplete } from './AssessmentComplete'
 import { AssessmentConfig } from './AssessmentConfig'
 import { AssessmentList } from './AssessmentList'
 import { AssessmentQuestions } from './AssessmentQuestions'
@@ -12,5 +13,6 @@ export const assessmentRoutes: Record<string, ComponentType> = {
   [assessmentPaths.list]: AssessmentList,
   [assessmentPaths.start]: AssessmentConfig,
   '/tests/take': AssessmentQuestions,
+  '/tests/complete': AssessmentComplete,
   '/tests/result': AssessmentResult,
 }

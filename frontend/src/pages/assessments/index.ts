@@ -1,3 +1,4 @@
+export { AssessmentComplete } from './AssessmentComplete'
 export { AssessmentConfig } from './AssessmentConfig'
 export { AssessmentList } from './AssessmentList'
 export { AssessmentQuestions } from './AssessmentQuestions'
