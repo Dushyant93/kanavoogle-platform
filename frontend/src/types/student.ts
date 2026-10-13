@@ -9,6 +9,12 @@ export type StudentProfile = {
   postcode: string
   region?: string
   skillSharingConsent: boolean
+  bio?: string | null
+  degree?: string | null
+  cohort?: string | null
+  expectedGraduation?: string | null
+  publicProfile?: boolean
+  photo?: string | null
 }
 
 export type StudentRegistration = {

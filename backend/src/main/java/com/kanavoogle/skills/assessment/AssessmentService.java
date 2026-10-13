@@ -44,11 +44,20 @@ public class AssessmentService {
     }
 
     public View create(Create r) {
+        if (r == null) throw new IllegalArgumentException("Assessment configuration is required");
+        if (r.skillId() == null || r.skillId().isBlank()) throw new IllegalArgumentException("Skill is required");
+        if (r.subSkillId() == null || r.subSkillId().isBlank()) throw new IllegalArgumentException("Sub-skill is required");
+        if (r.complexity() == null) throw new IllegalArgumentException("Complexity is required");
         if (r.questionCount() < 3 || r.questionCount() > 15)
             throw new IllegalArgumentException("Question count must be between 3 and 15");
         UserAccount u = student();
-        Skill skill = skills.findById(r.skillId()).orElseThrow(() -> new IllegalArgumentException("Unknown skill"));
-        Skill.SubSkill sub = skill.getSubSkills().stream().filter(x -> x.getId().equals(r.subSkillId())).findFirst().orElseThrow(() -> new IllegalArgumentException("Unknown sub-skill"));
+        Skill skill = skills.findById(r.skillId()).filter(Skill::isActive)
+                .orElseThrow(() -> new IllegalArgumentException("Unknown or inactive skill"));
+        Skill.SubSkill sub = skill.getSubSkills().stream()
+                .filter(Skill.SubSkill::isActive)
+                .filter(x -> x.getId().equals(r.subSkillId()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unknown or inactive sub-skill"));
         var p = u.getStudentProfile();
         Set<String> seen = new HashSet<>();
         for (var a : attempts.findTop10ByStudentIdOrderByCreatedAtDesc(u.getId()))
@@ -89,8 +98,14 @@ public class AssessmentService {
         return view(owned(id));
     }
 
+    public List<View> list() {
+        return attempts.findByStudentIdOrderByCreatedAtDesc(SecurityUtils.current().userId())
+                .stream().map(this::view).toList();
+    }
+
     public List<View> recent() {
-        return attempts.findTop10ByStudentIdOrderByCreatedAtDesc(SecurityUtils.current().userId()).stream().map(this::view).toList();
+        return attempts.findTop10ByStudentIdOrderByCreatedAtDesc(SecurityUtils.current().userId())
+                .stream().map(this::view).toList();
     }
 
     public Result submit(String id, Submit r) {
@@ -98,23 +113,21 @@ public class AssessmentService {
         if ("COMPLETED".equals(a.getStatus())) throw new IllegalStateException("Assessment already completed");
         if (r.responses() == null) throw new IllegalArgumentException("Responses are required");
         int correct = 0;
-        double earned = 0, possible = 0;
         Map<String, String> clean = new LinkedHashMap<>();
         for (var q : a.getQuestions()) {
             String ans = Optional.ofNullable(r.responses().get(q.getQuestionId())).orElse("").trim();
             if (ans.isBlank()) throw new IllegalArgumentException("Every question must be answered");
             if (ans.length() > 500) ans = ans.substring(0, 500);
             clean.put(q.getQuestionId(), ans);
-            double w = weight(q.getComplexity());
-            possible += w;
             if (q.getCorrectAnswer().equalsIgnoreCase(ans)) {
                 correct++;
-                earned += w;
             }
         }
         a.setResponses(clean);
         a.setRawPercent(round(correct * 100.0 / a.getQuestions().size()));
-        a.setWeightedPercent(round(earned * 100.0 / possible));
+        // Complexity weighting is intentionally left unset until the stakeholder
+        // confirms the scoring model.
+        a.setWeightedPercent(null);
         a.setStatus("COMPLETED");
         a.setCompletedAt(Instant.now());
         a = attempts.save(a);
@@ -211,13 +224,6 @@ public class AssessmentService {
         return x.substring(0, Math.min(80, x.length()));
     }
 
-    private double weight(Complexity c) {
-        return switch (c) {
-            case FOUNDATION -> 1;
-            case INTERMEDIATE -> 1.25;
-            case ADVANCED -> 1.5;
-        };
-    }
 
     private double round(double d) {
         return Math.round(d * 10) / 10.0;

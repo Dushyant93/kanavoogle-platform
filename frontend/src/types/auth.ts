@@ -34,3 +34,23 @@ export type LoginRequest = {
   email: string
   password: string
 }
+
+export type SchoolRegistration = {
+  displayName: string
+  email: string
+  password: string
+  schoolName: string
+  location: string
+  contactPerson: string
+  officialEmail: string
+}
+
+export type EmployerRegistration = {
+  displayName: string
+  email: string
+  password: string
+  businessName: string
+  region: string
+  contactPerson: string
+  organisationRole: string
+}

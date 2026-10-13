@@ -33,7 +33,12 @@ public class WalletController {
         List<SkillItem> items = new ArrayList<>();
         for (var list : g.values()) {
             var first = list.get(0);
-            double avg = list.stream().map(AssessmentAttempt::getWeightedPercent).filter(Objects::nonNull).mapToDouble(Double::doubleValue).average().orElse(0);
+            double avg = list.stream()
+                    .map(a -> a.getWeightedPercent() != null ? a.getWeightedPercent() : a.getRawPercent())
+                    .filter(Objects::nonNull)
+                    .mapToDouble(Double::doubleValue)
+                    .average()
+                    .orElse(0);
             var pr = proofs.create(id, first.getSkillId(), avg);
             items.add(new SkillItem(first.getSkillId(), first.getSkillName(), Math.round(avg * 10) / 10.0, list.size(), "PENDING_STAKEHOLDER_RULES", pr.proofType(), pr.proofValue()));
         }

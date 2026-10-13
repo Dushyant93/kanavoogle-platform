@@ -1,5 +1,6 @@
 package com.kanavoogle.skills.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.Instant;
 
 import org.springframework.data.annotation.Id;
@@ -12,6 +13,7 @@ public class UserAccount {
     private String id;
     @Indexed(unique = true)
     private String email;
+    @JsonIgnore
     private String passwordHash;
     private String displayName;
     private Role role;
@@ -108,6 +110,12 @@ public class UserAccount {
         private String state;
         private String suburb;
         private String postcode;
+        private String bio;
+        private String degree;
+        private String cohort;
+        private String expectedGraduation;
+        private boolean publicProfile;
+        private String photo;
 
         public Integer getAge() {
             return age;
@@ -171,6 +179,54 @@ public class UserAccount {
 
         public void setPostcode(String postcode) {
             this.postcode = postcode;
+        }
+
+        public String getBio() {
+            return bio;
+        }
+
+        public void setBio(String bio) {
+            this.bio = bio;
+        }
+
+        public String getDegree() {
+            return degree;
+        }
+
+        public void setDegree(String degree) {
+            this.degree = degree;
+        }
+
+        public String getCohort() {
+            return cohort;
+        }
+
+        public void setCohort(String cohort) {
+            this.cohort = cohort;
+        }
+
+        public String getExpectedGraduation() {
+            return expectedGraduation;
+        }
+
+        public void setExpectedGraduation(String expectedGraduation) {
+            this.expectedGraduation = expectedGraduation;
+        }
+
+        public boolean isPublicProfile() {
+            return publicProfile;
+        }
+
+        public void setPublicProfile(boolean publicProfile) {
+            this.publicProfile = publicProfile;
+        }
+
+        public String getPhoto() {
+            return photo;
+        }
+
+        public void setPhoto(String photo) {
+            this.photo = photo;
         }
     }
 

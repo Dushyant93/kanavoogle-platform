@@ -1,4 +1,4 @@
-import type { LoginRequest, User } from '../types/auth'
+import type { EmployerRegistration, LoginRequest, SchoolRegistration, User } from '../types/auth'
 import type { StudentRegistration } from '../types/student'
 import { request } from './http'
 
@@ -32,6 +32,18 @@ export const authService = {
   },
   registerStudent(body: StudentRegistration) {
     return request<User>('/auth/register/student', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    })
+  },
+  registerSchool(body: SchoolRegistration) {
+    return request<User>('/auth/register/school', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    })
+  },
+  registerEmployer(body: EmployerRegistration) {
+    return request<User>('/auth/register/employer', {
       method: 'POST',
       body: JSON.stringify(body),
     })
