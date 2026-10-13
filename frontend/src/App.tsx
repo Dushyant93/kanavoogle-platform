@@ -3,6 +3,9 @@ import { ComingSoon } from './pages/public/ComingSoon'
 import { Home } from './pages/public/Home'
 import { Login } from './pages/public/Login'
 import { Register } from './pages/public/Register'
+import { SchoolRegistration } from './pages/public/SchoolRegistration'
+import { BusinessRegistration } from './pages/public/BusinessRegistration'
+import { OrganisationDashboard } from './pages/organisation/OrganisationDashboard'
 import { Dashboard } from './pages/student/Dashboard'
 import { SkillsWallet } from './pages/wallet'
 import { Profile } from './pages/profile'
@@ -23,7 +26,11 @@ export default function App() {
   const path = window.location.pathname
   if (path === '/login') return <Login />
   if (path === '/register') return <Register />
+  if (path === '/register/school') return <SchoolRegistration />
+  if (path === '/register/employer') return <BusinessRegistration />
   if (path === '/student') return <Dashboard />
+  if (path === '/school') return <OrganisationDashboard role="SCHOOL" />
+  if (path === '/employer') return <OrganisationDashboard role="EMPLOYER" />
   if (path === '/my-vault') return <SkillsWallet />
   if (path === '/profile/edit') return <EditProfile />
   if (path === '/profile') return <Profile />

@@ -12,10 +12,10 @@ import { ApiError, request } from './http'
 import { assessmentMocks } from './mocks/assessmentMocks'
 import { skillsService } from './skillsService'
 
-export const USE_ASSESSMENT_MOCKS = import.meta.env.DEV && import.meta.env.VITE_USE_MOCKS !== 'false'
+export const USE_ASSESSMENT_MOCKS = import.meta.env.DEV && import.meta.env.VITE_USE_MOCKS === 'true'
 
 function isMissingEndpoint(error: unknown) {
-  return error instanceof ApiError && [403, 404, 405].includes(error.status)
+  return error instanceof ApiError && [404, 405].includes(error.status)
 }
 
 function reportFromAssessment(assessment: Assessment): AssessmentReport {
@@ -30,12 +30,16 @@ function reportFromAssessment(assessment: Assessment): AssessmentReport {
 
 export const assessmentFlowService = {
   list(): Promise<AssessmentListItem[]> {
-    return assessmentService.recent()
+    return assessmentService.list()
   },
 
   /** GET /skills — reuses the shared skills service. */
   skills(): Promise<Skill[]> {
     return skillsService.list()
+  },
+
+  skill(id: string): Promise<Skill> {
+    return skillsService.get(id)
   },
 
   /** POST /assessments — reuses the shared assessment service. */
@@ -53,8 +57,8 @@ export const assessmentFlowService = {
   /** POST /assessments/:id/submit — same endpoint as resultsService.submit, plus timings. */
   async submit(id: string, body: SubmitAnswersRequest): Promise<AssessmentReport> {
     const report = USE_ASSESSMENT_MOCKS
-      ? await assessmentMocks.submit(id, body)
-      : await request<AssessmentReport>(`/assessments/${encodeURIComponent(id)}/submit`, {
+        ? await assessmentMocks.submit(id, body)
+        : await request<AssessmentReport>(`/assessments/${encodeURIComponent(id)}/submit`, {
           method: 'POST',
           body: JSON.stringify(body),
         })

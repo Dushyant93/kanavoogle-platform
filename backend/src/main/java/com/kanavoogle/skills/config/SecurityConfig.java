@@ -31,9 +31,9 @@ public class SecurityConfig {
         http.cors(c -> c.configurationSource(corsConfigurationSource())).csrf(c -> c.disable()).sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(a ->
                         a.requestMatchers("/api/auth/register/**", "/api/auth/login", "/api/auth/logout").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/admin/seed/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/locations/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/skills/**").authenticated().anyRequest().authenticated())
+                                .requestMatchers(HttpMethod.POST, "/api/admin/seed/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/locations/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/skills/**").authenticated().anyRequest().authenticated())
                 .headers(h -> h.contentSecurityPolicy(c -> c.policyDirectives("default-src 'self'; frame-ancestors 'none'; object-src 'none'"))).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
@@ -48,7 +48,7 @@ public class SecurityConfig {
         CorsConfiguration c = new CorsConfiguration();
         c.setAllowedOrigins(Arrays.stream(props.getSecurity().getAllowedOrigins().split(",")).map(String::trim).toList());
         c.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        c.setAllowedHeaders(Arrays.asList("Content-Type", "Accept", "X-Requested-With"));
+        c.setAllowedHeaders(Arrays.asList("Content-Type", "Accept", "X-Requested-With", "X-SEED-KEY"));
         c.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource s = new UrlBasedCorsConfigurationSource();
         s.registerCorsConfiguration("/**", c);

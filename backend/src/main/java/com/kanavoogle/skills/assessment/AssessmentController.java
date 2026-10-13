@@ -15,6 +15,11 @@ public class AssessmentController {
         this.s = s;
     }
 
+    @GetMapping
+    public List<AssessmentService.View> list() {
+        return s.list();
+    }
+
     @PostMapping
     public AssessmentService.View create(@RequestBody AssessmentService.Create r) {
         return s.create(r);

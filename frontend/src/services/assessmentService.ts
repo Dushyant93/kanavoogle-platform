@@ -2,6 +2,9 @@ import type { Assessment, CreateAssessment } from '../types/assessment'
 import { request } from './http'
 
 export const assessmentService = {
+  list() {
+    return request<Assessment[]>('/assessments')
+  },
   create(body: CreateAssessment) {
     return request<Assessment>('/assessments', {
       method: 'POST',

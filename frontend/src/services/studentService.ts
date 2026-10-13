@@ -5,4 +5,10 @@ export const studentService = {
   dashboard() {
     return request<StudentDashboard>('/dashboard/student')
   },
+  schoolDashboard() {
+    return request<{ user: import('../types/auth').User; message: string }>('/dashboard/school')
+  },
+  employerDashboard() {
+    return request<{ user: import('../types/auth').User; message: string }>('/dashboard/employer')
+  },
 }

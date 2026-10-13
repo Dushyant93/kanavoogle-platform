@@ -103,7 +103,7 @@ export function Register() {
                     setLocationError(null)
                     try {
                         const results = locationMode === 'area' ? await locationService.searchByArea( state, query, controller.signal,)
-                                : await locationService.searchByPostcode(state, query, controller.signal,)
+                            : await locationService.searchByPostcode(state, query, controller.signal,)
 
                         setLocationResults(results)
 
@@ -185,6 +185,9 @@ export function Register() {
                     </h1>
                     <p className="register__lead">
                         Set up your profile so schools can assess skills and you can keep verified evidence.
+                    </p>
+                    <p className="register__signin">
+                        Registering a school or employer? <a href="/register/school">School account</a> · <a href="/register/employer">Employer account</a>
                     </p>
                     {error ? <Alert variant="danger">{error}</Alert> : null}
                     <Form onSubmit={handleSubmit}>
