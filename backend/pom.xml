@@ -56,6 +56,19 @@
             <version>${jjwt.version}</version>
             <scope>runtime</scope>
         </dependency>
+        <!-- Hyperledger Fabric Gateway client (credential proof adapter) -->
+        <dependency>
+            <groupId>org.hyperledger.fabric</groupId>
+            <artifactId>fabric-gateway</artifactId>
+            <version>1.7.0</version>
+        </dependency>
+        <dependency><groupId>com.google.protobuf</groupId><artifactId>protobuf-java</artifactId><version>4.28.3</version></dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty-shaded</artifactId>
+            <version>1.68.1</version>
+            <scope>runtime</scope>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
