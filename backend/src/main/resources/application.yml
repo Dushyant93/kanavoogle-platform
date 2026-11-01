@@ -17,6 +17,8 @@ app:
     jwt-ttl-minutes: ${JWT_TTL_MINUTES:480}
     cookie-secure: ${COOKIE_SECURE:false}
     allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:8088}
+  seed:
+    key: ${SEED_KEY:}
   llm:
     enabled: ${LLM_ENABLED:false}
     base-url: ${LLM_BASE_URL:https://api.openai.com/v1}

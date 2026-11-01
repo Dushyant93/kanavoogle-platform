@@ -15,6 +15,11 @@ public class AssessmentController {
         this.s = s;
     }
 
+    @GetMapping
+    public List<AssessmentService.View> list() {
+        return s.list();
+    }
+
     @PostMapping
     public AssessmentService.View create(@RequestBody AssessmentService.Create r) {
         return s.create(r);
@@ -33,5 +38,10 @@ public class AssessmentController {
     @PostMapping("/{id}/submit")
     public AssessmentService.Result submit(@PathVariable String id, @RequestBody AssessmentService.Submit r) {
         return s.submit(id, r);
+    }
+
+    @GetMapping("/{id}/result")
+    public AssessmentService.Result result(@PathVariable String id) {
+        return s.result(id);
     }
 }

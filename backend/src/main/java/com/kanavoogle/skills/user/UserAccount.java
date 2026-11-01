@@ -1,5 +1,6 @@
 package com.kanavoogle.skills.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.Instant;
 
 import org.springframework.data.annotation.Id;
@@ -12,6 +13,7 @@ public class UserAccount {
     private String id;
     @Indexed(unique = true)
     private String email;
+    @JsonIgnore
     private String passwordHash;
     private String displayName;
     private Role role;
@@ -105,6 +107,15 @@ public class UserAccount {
         private Integer age, yearLevel;
         private String schoolName, region;
         private boolean skillSharingConsent;
+        private String state;
+        private String suburb;
+        private String postcode;
+        private String bio;
+        private String degree;
+        private String cohort;
+        private String expectedGraduation;
+        private boolean publicProfile;
+        private String photo;
 
         public Integer getAge() {
             return age;
@@ -145,10 +156,85 @@ public class UserAccount {
         public void setSkillSharingConsent(boolean v) {
             skillSharingConsent = v;
         }
+
+        public String getState() {
+            return state;
+        }
+
+        public void setState(String state) {
+            this.state = state;
+        }
+
+        public String getSuburb() {
+            return suburb;
+        }
+
+        public void setSuburb(String suburb) {
+            this.suburb = suburb;
+        }
+
+        public String getPostcode() {
+            return postcode;
+        }
+
+        public void setPostcode(String postcode) {
+            this.postcode = postcode;
+        }
+
+        public String getBio() {
+            return bio;
+        }
+
+        public void setBio(String bio) {
+            this.bio = bio;
+        }
+
+        public String getDegree() {
+            return degree;
+        }
+
+        public void setDegree(String degree) {
+            this.degree = degree;
+        }
+
+        public String getCohort() {
+            return cohort;
+        }
+
+        public void setCohort(String cohort) {
+            this.cohort = cohort;
+        }
+
+        public String getExpectedGraduation() {
+            return expectedGraduation;
+        }
+
+        public void setExpectedGraduation(String expectedGraduation) {
+            this.expectedGraduation = expectedGraduation;
+        }
+
+        public boolean isPublicProfile() {
+            return publicProfile;
+        }
+
+        public void setPublicProfile(boolean publicProfile) {
+            this.publicProfile = publicProfile;
+        }
+
+        public String getPhoto() {
+            return photo;
+        }
+
+        public void setPhoto(String photo) {
+            this.photo = photo;
+        }
     }
 
     public static class SchoolProfile {
         private String schoolName, location, contactPerson, officialEmail;
+        private String state;
+        private String suburb;
+        private String postcode;
 
         public String getSchoolName() {
             return schoolName;
@@ -180,6 +266,30 @@ public class UserAccount {
 
         public void setOfficialEmail(String v) {
             officialEmail = v;
+        }
+
+        public String getState() {
+            return state;
+        }
+
+        public void setState(String state) {
+            this.state = state;
+        }
+
+        public String getSuburb() {
+            return suburb;
+        }
+
+        public void setSuburb(String suburb) {
+            this.suburb = suburb;
+        }
+
+        public String getPostcode() {
+            return postcode;
+        }
+
+        public void setPostcode(String postcode) {
+            this.postcode = postcode;
         }
     }
 
